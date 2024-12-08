@@ -1,12 +1,12 @@
 # Bomberman
 The Bomberman game in C++, without use of SFML library
 
-# Description
+## Description
 Bomberman Clone is a grid-based arcade game where the player strategically places bombs to destroy obstacles and defeat enemies. The game involves elements of timing, strategy, and survival. The player must avoid enemies and explosions while aiming to clear all enemies to win.
 
 This is a simplified version of the classic Bomberman game. The features and details to be implemented are provided below.
 
-# Gameplay
+## Gameplay
 Player vs. Enemies and Obstacles
 
 1. The game field is divided into rows and columns, represented by a 2D array.
@@ -21,46 +21,46 @@ Player vs. Enemies and Obstacles
 8. The player can move freely across empty spaces (' '), but their movement is restricted by obstacles, walls, and the grid boundaries.
 Note: Can use different symbols for players etc  for  better visualization.
 
-# Features to Implement
-1. Player Movement
+## Features to Implement
+### Player Movement
    - The player moves using arrow keys.
    - Movement is restricted by obstacles ('O') and walls ('#').
 
-2. Bomb Placement
+### Bomb Placement
    - Bombs are placed at the player's position and detonate after a fixed delay.
    - Bomb explosions clear destructible obstacles and damage enemies.
 
-3. Enemy 
+### Enemy 
    - Enemies move randomly within the grid but avoid walls and obstacles..
 
-4. Explosion Logic
+### Explosion Logic
    - Bomb explosions have a fixed range and affect all entities within the radius (enemies, obstacles, player).
    - The explosion lasts for a short duration and then resets the affected cells to empty (' ').
 
-5. Power-ups (Bonus)
+### Power-ups (Bonus)
    - Add power-ups that grant abilities like increased speed, bomb range, or multiple bombs.
 
-6. Win and Lose Conditions
+### Win and Lose Conditions
    - The player wins by eliminating all enemies.
    - The player loses if caught in an explosion or collides with an enemy.
-7. File Handling
-    - Store the top 3 max score in a txt file
-8. Sound
- -Add sound effects for bomb planting and detonating.
-9. Stages
--Create atleast 2 stages
+### File Handling
+   - Store the top 3 max score in a txt file
+### Sound
+   - Add sound effects for bomb planting and detonating.
+### Stages
+   - Create atleast 2 stages
 
-# Scoring
+## Scoring
 - Destroying enemies: 50 points per enemy
 - Destroying obstacles: 10 points per obstacle
 - Picking up power-ups: 20 points per power-up
 
-# Other features
+## Other features
 1. Multiple Levels: Increase the number of enemies and obstacles with each level.
 2. Dynamic Obstacles: Introduce new obstacle types like moving blocks.
 3. Multiplayer Mode: Allow two players to compete on the same grid.
 
-# Legend:
+## Legend:
 - 'P': Player
 - 'E': Enemy
 - 'O': Destructible Obstacle
