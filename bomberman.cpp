@@ -1,20 +1,27 @@
-/*Added Player functionality*/
+/*Added game loop
+Notes:
+- Basic structure of game is complete
+- Flickering is due to 'system("cls")'. Needs a fix
+- Added additional comments to the code
+*/
 
 #include <iostream>
-#include <conio.h>
+#include <conio.h>		// _getch()
+#include <windows.h>	// Used for Sleep() function (Not used here)
 using namespace std;
 
+bool gameOver = false;
 char grid[11][21];
 int playerRow = 1, playerCol = 1;
-string PlayerDir = "none";
+string PlayerDir = "none";	// Should be replaced wih 'char'
 
-void Stage()
+void Stage()	// Initialize the array with our map
 {
 	for (int i = 0; i <= 10; i++)
 	{
 		for (int j = 0; j <= 20; j++)
 		{
-			if (i == 0 || j == 0 || j == 20 || i == 10 || i % 2 == 0 && j % 2 == 0)
+			if (i == 0 || j == 0 || j == 20 || i == 10 || (i % 2 == 0 && j % 2 == 0))
 			{
 				grid[i][j] = '#';
 			}
@@ -26,12 +33,9 @@ void Stage()
 	}
 	grid[playerRow][playerCol] = 'P';
 }
-void Draw()
+void Draw()	// Draw the array
 {
 	system("cls");
-	// For debugging
-	cout << "Player Row: " << playerRow << "\tPlayer Column: " << playerCol << endl;
-
 	for (int i = 0; i <= 10; i++)
 	{
 		for (int j = 0; j <= 20; j++)
@@ -41,7 +45,7 @@ void Draw()
 		cout << endl;
 	}
 }
-void PlayerMovement()
+void PlayerMovement()	// Move the player
 {
 	int tempRow = playerRow;
 	int tempCol = playerCol;
@@ -67,9 +71,9 @@ void PlayerMovement()
 	grid[tempRow][tempCol] = ' ';
 	grid[playerRow][playerCol] = 'P';
 }
-void Input()
+void Input()	// Take input from user
 {
-	if (_kbhit())
+	if (_kbhit())	// Asynchronous input
 	{
 		switch (_getch())
 		{
@@ -93,6 +97,9 @@ void Input()
 			if (grid[playerRow][playerCol - 1] == ' ')
 				PlayerDir = "left";
 			break;
+		case 'x':
+			gameOver = true;
+			break;
 		}
 		PlayerMovement();
 	}
@@ -101,9 +108,10 @@ void Input()
 int main()
 {
 	Stage();
-	Draw();
-	while (true)
+	while (!gameOver)	// Game loop
 	{
+		Draw();
 		Input();
 	}
+	cout << "Game Over!" << endl;
 }
