@@ -1,21 +1,18 @@
-/*Added game loop
-Notes:
-- Basic structure of game is complete
-- Flickering is due to 'system("cls")'. Needs a fix
-- Added additional comments to the code
-*/
+/*Added bomb functionality (using thread)*/
 
 #include <iostream>
-#include <conio.h>		// _getch()
-#include <windows.h>	// Used for Sleep() function (Not used here)
+#include <conio.h>
+#include <windows.h>
+#include <thread>
 using namespace std;
 
 bool gameOver = false;
 char grid[11][21];
 int playerRow = 1, playerCol = 1;
-string PlayerDir = "none";	// Should be replaced wih 'char'
+string PlayerDir = "none";
+string activity = "";
 
-void Stage()	// Initialize the array with our map
+void Stage()
 {
 	for (int i = 0; i <= 10; i++)
 	{
@@ -33,9 +30,13 @@ void Stage()	// Initialize the array with our map
 	}
 	grid[playerRow][playerCol] = 'P';
 }
-void Draw()	// Draw the array
+void Draw()
 {
 	system("cls");
+	// For debugging
+	cout << "Player Row: " << playerRow << "\tPlayer Column: " << playerCol << endl;
+	cout << "Last activity: " << activity << endl;
+
 	for (int i = 0; i <= 10; i++)
 	{
 		for (int j = 0; j <= 20; j++)
@@ -45,10 +46,10 @@ void Draw()	// Draw the array
 		cout << endl;
 	}
 }
-void PlayerMovement()	// Move the player
+void PlayerMovement()
 {
-	int tempRow = playerRow;
-	int tempCol = playerCol;
+	if (grid[playerRow][playerCol] != 'B')
+		grid[playerRow][playerCol] = ' ';
 
 	if (PlayerDir == "up")
 	{
@@ -68,12 +69,32 @@ void PlayerMovement()	// Move the player
 	}
 	PlayerDir = "none";
 
-	grid[tempRow][tempCol] = ' ';
 	grid[playerRow][playerCol] = 'P';
 }
-void Input()	// Take input from user
+void Bomb()
 {
-	if (_kbhit())	// Asynchronous input
+	activity = "Placed Bomb at " + to_string(playerRow) + ", " + to_string(playerCol);
+	int bombRow = playerRow;
+	int bombCol = playerCol;
+	grid[bombRow][bombCol] = 'B';
+
+	this_thread::sleep_for(chrono::seconds(3));
+	grid[bombRow][bombCol] = 'X';
+	if (grid[bombRow - 1][bombCol] == ' ') { grid[bombRow - 1][bombCol] = 'X'; }
+	if (grid[bombRow + 1][bombCol] == ' ') { grid[bombRow + 1][bombCol] = 'X'; }
+	if (grid[bombRow][bombCol + 1] == ' ') { grid[bombRow][bombCol + 1] = 'X'; }
+	if (grid[bombRow][bombCol - 1] == ' ') { grid[bombRow][bombCol - 1] = 'X'; }
+
+	this_thread::sleep_for(chrono::seconds(1));
+	grid[bombRow][bombCol] = ' ';
+	if (grid[bombRow - 1][bombCol] == 'X') { grid[bombRow - 1][bombCol] = ' '; }
+	if (grid[bombRow + 1][bombCol] == 'X') { grid[bombRow + 1][bombCol] = ' '; }
+	if (grid[bombRow][bombCol + 1] == 'X') { grid[bombRow][bombCol + 1] = ' '; }
+	if (grid[bombRow][bombCol - 1] == 'X') { grid[bombRow][bombCol - 1] = ' '; }
+}
+void Input()
+{
+	if (_kbhit())
 	{
 		switch (_getch())
 		{
@@ -97,6 +118,14 @@ void Input()	// Take input from user
 			if (grid[playerRow][playerCol - 1] == ' ')
 				PlayerDir = "left";
 			break;
+		case 'b':
+		case ' ':
+		if (grid[playerRow][playerCol] != 'B')
+		{
+			thread bombThread(Bomb);
+			bombThread.detach();
+		}
+			break;
 		case 'x':
 			gameOver = true;
 			break;
@@ -108,7 +137,7 @@ void Input()	// Take input from user
 int main()
 {
 	Stage();
-	while (!gameOver)	// Game loop
+	while (!gameOver)
 	{
 		Draw();
 		Input();
