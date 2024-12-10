@@ -9,7 +9,7 @@ using namespace std;
 bool gameOver = false;
 char grid[11][21];
 int playerRow = 1, playerCol = 1;
-string PlayerDir = "none";
+string playerDir = "none";
 string activity = "";
 
 void Stage()
@@ -46,28 +46,31 @@ void Draw()
 		cout << endl;
 	}
 }
-void PlayerMovement()
+void PlayerMovement(string playerDir)
 {
 	if (grid[playerRow][playerCol] != 'B')
 		grid[playerRow][playerCol] = ' ';
 
-	if (PlayerDir == "up")
+	if (playerDir == "up")
 	{
-		playerRow--;
+		if (grid[playerRow - 1][playerCol] == ' ')
+			playerRow--;
 	}
-	else if (PlayerDir == "down")
+	else if (playerDir == "down")
 	{
-		playerRow++;
+		if (grid[playerRow + 1][playerCol] == ' ')
+			playerRow++;
 	}
-	else if (PlayerDir == "right")
+	else if (playerDir == "right")
 	{
-		playerCol++;
+		if (grid[playerRow][playerCol + 1] == ' ')
+			playerCol++;
 	}
-	else if (PlayerDir == "left")
+	else if (playerDir == "left")
 	{
-		playerCol--;
+		if (grid[playerRow][playerCol - 1] == ' ')
+			playerCol--;
 	}
-	PlayerDir = "none";
 
 	grid[playerRow][playerCol] = 'P';
 }
@@ -94,29 +97,27 @@ void Bomb()
 }
 void Input()
 {
+	string playerDir = "none";
+
 	if (_kbhit())
 	{
 		switch (_getch())
 		{
 		case 'w':
 		case 72:
-			if (grid[playerRow - 1][playerCol] == ' ')
-				PlayerDir = "up";
+			playerDir = "up";
 			break;
 		case 's':
 		case 80:
-			if (grid[playerRow + 1][playerCol] == ' ')
-				PlayerDir = "down";
+			playerDir = "down";
 			break;
 		case 'd':
 		case 77:
-			if (grid[playerRow][playerCol + 1] == ' ')
-				PlayerDir = "right";
+			playerDir = "right";
 			break;
 		case 'a':
 		case 75:
-			if (grid[playerRow][playerCol - 1] == ' ')
-				PlayerDir = "left";
+			playerDir = "left";
 			break;
 		case 'b':
 		case ' ':
@@ -130,7 +131,7 @@ void Input()
 			gameOver = true;
 			break;
 		}
-		PlayerMovement();
+		PlayerMovement(playerDir);
 	}
 }
 

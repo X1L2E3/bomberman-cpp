@@ -68,5 +68,7 @@ Note: Can use different symbols for players etc  for  better visualization.
 - ' ': Empty Space
 - '+': Power-Up (e.g., increased bomb range)
 
+----------
+
 ## Current progress:
-- A few version away from a basic bomberman game
+- A few versions away from a basic bomberman game
