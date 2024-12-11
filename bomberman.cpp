@@ -1,4 +1,4 @@
-/*Added bomb functionality (using thread)*/
+/*Added multiple bombs functionality*/
 
 #include <iostream>
 #include <conio.h>
@@ -7,8 +7,10 @@
 using namespace std;
 
 bool gameOver = false;
-char grid[11][21];
-int playerRow = 1, playerCol = 1;
+const int WIDTH = 21, HEIGHT = 11;
+char grid[HEIGHT][WIDTH];
+bool bombGrid[HEIGHT][WIDTH];
+int playerRow = 1, playerCol = 1, bombCount = 3;
 string playerDir = "none";
 string activity = "";
 
@@ -41,14 +43,21 @@ void Draw()
 	{
 		for (int j = 0; j <= 20; j++)
 		{
-			cout << grid[i][j];
+			if (bombGrid[i][j])
+			{
+				cout << "B";
+			}
+			else
+			{
+				cout << grid[i][j];
+			}
 		}
 		cout << endl;
 	}
 }
 void PlayerMovement(string playerDir)
 {
-	if (grid[playerRow][playerCol] != 'B')
+	if (grid[playerRow][playerCol] == 'P')
 		grid[playerRow][playerCol] = ' ';
 
 	if (playerDir == "up")
@@ -77,11 +86,14 @@ void PlayerMovement(string playerDir)
 void Bomb()
 {
 	activity = "Placed Bomb at " + to_string(playerRow) + ", " + to_string(playerCol);
+
 	int bombRow = playerRow;
 	int bombCol = playerCol;
-	grid[bombRow][bombCol] = 'B';
+	bombGrid[bombRow][bombCol] = true;
 
 	this_thread::sleep_for(chrono::seconds(3));
+	bombGrid[bombRow][bombCol] = false;
+	bombCount++;
 	grid[bombRow][bombCol] = 'X';
 	if (grid[bombRow - 1][bombCol] == ' ') { grid[bombRow - 1][bombCol] = 'X'; }
 	if (grid[bombRow + 1][bombCol] == ' ') { grid[bombRow + 1][bombCol] = 'X'; }
@@ -121,10 +133,13 @@ void Input()
 			break;
 		case 'b':
 		case ' ':
-		if (grid[playerRow][playerCol] != 'B')
+		if (!bombGrid[playerRow][playerCol] && bombCount)
 		{
 			thread bombThread(Bomb);
 			bombThread.detach();
+
+			bombGrid[playerRow][playerCol] = true;
+			bombCount--;
 		}
 			break;
 		case 'x':
