@@ -104,6 +104,7 @@ void Bomb()
 
 	this_thread::sleep_for(chrono::seconds(1));
 	grid[bombRow][bombCol] = ' ';
+	this_thread::sleep_for(chrono::milliseconds(100));	// Added for fun, will remove this later
 	if (grid[bombRow - 1][bombCol] == 'X') { grid[bombRow - 1][bombCol] = ' '; }
 	if (grid[bombRow + 1][bombCol] == 'X') { grid[bombRow + 1][bombCol] = ' '; }
 	if (grid[bombRow][bombCol + 1] == 'X') { grid[bombRow][bombCol + 1] = ' '; }
