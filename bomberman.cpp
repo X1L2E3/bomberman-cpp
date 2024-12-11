@@ -37,7 +37,8 @@ void Draw()
 	system("cls");
 	// For debugging
 	cout << "Player Row: " << playerRow << "\tPlayer Column: " << playerCol << endl;
-	cout << "Last activity: " << activity << endl;
+	cout << "Bombs: " << bombCount << endl;
+	cout << "Last activity: " << activity << endl << endl;
 
 	for (int i = 0; i <= 10; i++)
 	{
@@ -87,6 +88,7 @@ void Bomb()
 {
 	activity = "Placed Bomb at " + to_string(playerRow) + ", " + to_string(playerCol);
 
+	bombCount--;
 	int bombRow = playerRow;
 	int bombCol = playerCol;
 	bombGrid[bombRow][bombCol] = true;
@@ -139,7 +141,6 @@ void Input()
 			bombThread.detach();
 
 			bombGrid[playerRow][playerCol] = true;
-			bombCount--;
 		}
 			break;
 		case 'x':
