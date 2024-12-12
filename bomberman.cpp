@@ -12,7 +12,6 @@ char grid[HEIGHT][WIDTH];
 bool bombGrid[HEIGHT][WIDTH];
 int playerRow = 1, playerCol = 1, bombCount = 3;
 string playerDir = "none";
-string activity = "";
 
 void Stage()
 {
@@ -34,11 +33,12 @@ void Stage()
 }
 void Draw()
 {
-	system("cls");
+	// Takes cursor to 0, 0 position, which then overwrites the existing text in console
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0 });
+
 	// For debugging
 	cout << "Player Row: " << playerRow << "\tPlayer Column: " << playerCol << endl;
 	cout << "Bombs: " << bombCount << endl;
-	cout << "Last activity: " << activity << endl << endl;
 
 	for (int i = 0; i <= 10; i++)
 	{
@@ -86,8 +86,6 @@ void PlayerMovement(string playerDir)
 }
 void Bomb()
 {
-	activity = "Placed Bomb at " + to_string(playerRow) + ", " + to_string(playerCol);
-
 	bombCount--;
 	int bombRow = playerRow;
 	int bombCol = playerCol;
