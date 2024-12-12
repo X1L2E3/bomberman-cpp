@@ -1,4 +1,4 @@
-/*Added multiple bombs functionality*/
+/*Improved grid*/
 
 #include <iostream>
 #include <conio.h>
@@ -7,7 +7,7 @@
 using namespace std;
 
 bool gameOver = false;
-const int WIDTH = 21, HEIGHT = 11;
+const int WIDTH = 31, HEIGHT = 11;
 char grid[HEIGHT][WIDTH];
 bool bombGrid[HEIGHT][WIDTH];
 int playerRow = 1, playerCol = 1, bombCount = 3;
@@ -42,7 +42,7 @@ void Stage()
 void Draw()
 {
 	// Takes cursor to 0, 0 position, which then overwrites the existing text in console
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0 });
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
 
 	// For debugging
 	cout << "Player Row: " << playerRow << "\tPlayer Column: " << playerCol << endl;
