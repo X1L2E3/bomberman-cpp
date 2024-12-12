@@ -19,7 +19,15 @@ void Stage()
 	{
 		for (int j = 0; j <= 20; j++)
 		{
-			if (i == 0 || j == 0 || j == 20 || i == 10 || (i % 2 == 0 && j % 2 == 0))
+			if (i == 0 || i == 10)
+			{
+				grid[i][j] = '-';
+			}
+			else if (j == 0 || j == 20)
+			{
+				grid[i][j] = '|';
+			}
+			else if (i % 2 == 0 && j % 2 == 0)
 			{
 				grid[i][j] = '#';
 			}
