@@ -2,6 +2,7 @@
 Known issues:
 - One bomb's explosion clears another bomb's explosion
 - Bomb explosion going through walls
+- Player phases through Bomb
 */
 
 #include <iostream>
@@ -14,7 +15,7 @@ bool gameOver = false;
 const int WIDTH = 31, HEIGHT = 11;
 char grid[HEIGHT][WIDTH];
 bool bombGrid[HEIGHT][WIDTH];
-int playerRow = 1, playerCol = 1, bombCount = 3, bombLevel = 3;
+int playerRow = 1, playerCol = 1, bombCount = 3, bombLevel = 2;
 string playerDir = "none";
 
 void Stage()
