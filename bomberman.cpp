@@ -1,4 +1,8 @@
-/*Improved grid*/
+/*Added increased bomb radius
+Known issues:
+- One bomb's explosion clears another bomb's explosion
+- Bomb explosion going through walls
+*/
 
 #include <iostream>
 #include <conio.h>
@@ -10,7 +14,7 @@ bool gameOver = false;
 const int WIDTH = 31, HEIGHT = 11;
 char grid[HEIGHT][WIDTH];
 bool bombGrid[HEIGHT][WIDTH];
-int playerRow = 1, playerCol = 1, bombCount = 3;
+int playerRow = 1, playerCol = 1, bombCount = 3, bombLevel = 3;
 string playerDir = "none";
 
 void Stage()
@@ -103,18 +107,33 @@ void Bomb()
 	bombGrid[bombRow][bombCol] = false;
 	bombCount++;
 	grid[bombRow][bombCol] = 'X';
-	if (grid[bombRow - 1][bombCol] == ' ') { grid[bombRow - 1][bombCol] = 'X'; }
-	if (grid[bombRow + 1][bombCol] == ' ') { grid[bombRow + 1][bombCol] = 'X'; }
-	if (grid[bombRow][bombCol + 1] == ' ') { grid[bombRow][bombCol + 1] = 'X'; }
-	if (grid[bombRow][bombCol - 1] == ' ') { grid[bombRow][bombCol - 1] = 'X'; }
+	for (int i = 1; i <= bombLevel; i++)
+		if (grid[bombRow - i][bombCol] == ' ')
+			grid[bombRow - i][bombCol] = 'X';
+	for (int i = 1; i <= bombLevel; i++)
+		if (grid[bombRow + i][bombCol] == ' ')
+			grid[bombRow + i][bombCol] = 'X';
+	for (int i = 1; i <= bombLevel; i++)
+		if (grid[bombRow][bombCol + i] == ' ')
+			grid[bombRow][bombCol + i] = 'X';
+	for (int i = 1; i <= bombLevel; i++)
+		if (grid[bombRow][bombCol - i] == ' ')
+			grid[bombRow][bombCol - i] = 'X';
 
 	this_thread::sleep_for(chrono::seconds(1));
 	grid[bombRow][bombCol] = ' ';
-	this_thread::sleep_for(chrono::milliseconds(100));	// Added for fun, will remove this later
-	if (grid[bombRow - 1][bombCol] == 'X') { grid[bombRow - 1][bombCol] = ' '; }
-	if (grid[bombRow + 1][bombCol] == 'X') { grid[bombRow + 1][bombCol] = ' '; }
-	if (grid[bombRow][bombCol + 1] == 'X') { grid[bombRow][bombCol + 1] = ' '; }
-	if (grid[bombRow][bombCol - 1] == 'X') { grid[bombRow][bombCol - 1] = ' '; }
+	for (int i = 1; i <= bombLevel; i++)
+		if (grid[bombRow - i][bombCol] == 'X')
+			grid[bombRow - i][bombCol] = ' ';
+	for (int i = 1; i <= bombLevel; i++)
+		if (grid[bombRow + i][bombCol] == 'X')
+			grid[bombRow + i][bombCol] = ' ';
+	for (int i = 1; i <= bombLevel; i++)
+		if (grid[bombRow][bombCol + i] == 'X')
+			grid[bombRow][bombCol + i] = ' ';
+	for (int i = 1; i <= bombLevel; i++)
+		if (grid[bombRow][bombCol - i] == 'X')
+			grid[bombRow][bombCol - i] = ' ';
 }
 void Input()
 {

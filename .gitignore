@@ -1,6 +1,9 @@
 # ignore ALL .log files
 *.log
 
+# ignore specific files
+settings.json
+
 # ignore ALL files in ANY directory named temp
 temp/
 
