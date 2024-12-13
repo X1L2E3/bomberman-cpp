@@ -1,4 +1,4 @@
-/*Added increased bomb radius
+/*Added first game over condition
 Known issues:
 - One bomb's explosion clears another bomb's explosion
 - Bomb explosion going through walls
@@ -77,21 +77,29 @@ void PlayerMovement(string playerDir)
 	{
 		if (grid[playerRow - 1][playerCol] == ' ')
 			playerRow--;
+		else if (grid[playerRow - 1][playerCol] == 'X')
+			gameOver = true;
 	}
 	else if (playerDir == "down")
 	{
 		if (grid[playerRow + 1][playerCol] == ' ')
 			playerRow++;
+		else if (grid[playerRow + 1][playerCol] == 'X')
+			gameOver = true;
 	}
 	else if (playerDir == "right")
 	{
 		if (grid[playerRow][playerCol + 1] == ' ')
 			playerCol++;
+		else if (grid[playerRow][playerCol + 1] == 'X')
+			gameOver = true;
 	}
 	else if (playerDir == "left")
 	{
 		if (grid[playerRow][playerCol - 1] == ' ')
 			playerCol--;
+		else if (grid[playerRow][playerCol - 1] == 'X')
+			gameOver = true;
 	}
 
 	grid[playerRow][playerCol] = 'P';
@@ -185,5 +193,5 @@ int main()
 		Draw();
 		Input();
 	}
-	cout << "Game Over!" << endl;
+	cout << "\nGame Over!" << endl;
 }
