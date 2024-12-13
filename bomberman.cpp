@@ -114,19 +114,29 @@ void Bomb()
 	this_thread::sleep_for(chrono::seconds(3));
 	bombGrid[bombRow][bombCol] = false;
 	bombCount++;
+	
+	if (grid[bombRow][bombCol] == 'P') gameOver = true;
 	grid[bombRow][bombCol] = 'X';
 	for (int i = 1; i <= bombLevel; i++)
 		if (grid[bombRow - i][bombCol] == ' ')
 			grid[bombRow - i][bombCol] = 'X';
+		else if (grid[bombRow - i][bombCol] == 'P')
+			gameOver = true;
 	for (int i = 1; i <= bombLevel; i++)
 		if (grid[bombRow + i][bombCol] == ' ')
 			grid[bombRow + i][bombCol] = 'X';
+		else if (grid[bombRow + i][bombCol] == 'P')
+			gameOver = true;
 	for (int i = 1; i <= bombLevel; i++)
 		if (grid[bombRow][bombCol + i] == ' ')
 			grid[bombRow][bombCol + i] = 'X';
+		else if (grid[bombRow][bombCol + i] == 'P')
+			gameOver = true;
 	for (int i = 1; i <= bombLevel; i++)
 		if (grid[bombRow][bombCol - i] == ' ')
 			grid[bombRow][bombCol - i] = 'X';
+		else if (grid[bombRow][bombCol - i] == 'P')
+			gameOver = true;
 
 	this_thread::sleep_for(chrono::seconds(1));
 	grid[bombRow][bombCol] = ' ';
