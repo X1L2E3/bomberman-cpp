@@ -2,6 +2,7 @@
 Known issues:
 - One bomb's explosion clears another bomb's explosion
 - Bomb explosion going through walls
+- Bomb logic should be replaced with timer
 */
 
 #include <iostream>
@@ -199,6 +200,12 @@ void Input()
 int main()
 {
 	Stage();
+	cout << "Bomberman" << endl;
+	cout << "Press b to place bomb, w, a, s, d to move" << endl;
+	cout << "Press x to quit" << endl;
+	cout << "[ANY KEY] Play game" << endl;
+	_getch();
+	system("cls");
 	while (!gameOver)
 	{
 		Draw();
