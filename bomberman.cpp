@@ -2,7 +2,6 @@
 Known issues:
 - One bomb's explosion clears another bomb's explosion
 - Bomb explosion going through walls
-- Player phases through Bomb
 */
 
 #include <iostream>
