@@ -59,7 +59,8 @@ void Draw()
 		{
 			if (bombGrid[i][j])
 			{
-				cout << "B";
+				grid[i][j] = 'B';
+				cout << grid[i][j];
 			}
 			else
 			{
