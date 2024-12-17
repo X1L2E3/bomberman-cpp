@@ -1,22 +1,21 @@
 /*Added first game over condition
 Known issues:
 - One bomb's explosion clears another bomb's explosion
-- Bomb explosion going through walls
-- Bomb logic should be replaced with timer
+- Bomb clear logic needs to be added now
 */
 
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
-#include <thread>
+// #include <thread>
 using namespace std;
 
 bool gameOver = false;
 const int WIDTH = 31, HEIGHT = 11;
 char grid[HEIGHT][WIDTH];
-bool bombGrid[HEIGHT][WIDTH];
-int playerRow = 1, playerCol = 1, bombCount = 3, bombLevel = 2;
+int playerRow = 1, playerCol = 1, bombCount = 3, bombLevel = 2, obstacleCount = 20;
 string playerDir = "none";
+time_t bombTime[HEIGHT][WIDTH];
 
 void Stage()
 {
@@ -43,10 +42,31 @@ void Stage()
 		}
 	}
 	grid[playerRow][playerCol] = 'P';
+
+	for (int i = 0; i <= HEIGHT; i++)
+	{
+		for (int j = 0; j <= WIDTH; j++)
+		{
+			bombTime[i][j] = 0;
+		}
+	}
+
+	while (obstacleCount)
+{
+	int obstacleRow = rand() % 10, obstacleCol = rand() % 20;
+	if (grid[obstacleRow][obstacleCol] == ' ' &&
+		obstacleRow != playerRow + 1 && obstacleCol != playerCol && 
+		obstacleRow != playerRow - 1 && obstacleCol != playerCol &&
+		obstacleRow != playerRow && obstacleCol != playerCol + 1 &&
+		obstacleRow != playerRow && obstacleCol != playerCol - 1)
+	{
+		grid[obstacleRow][obstacleCol] = 'O';
+		obstacleCount--;
+	}
+}
 }
 void Draw()
 {
-	// Takes cursor to 0, 0 position, which then overwrites the existing text in console
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
 
 	// For debugging
@@ -57,7 +77,7 @@ void Draw()
 	{
 		for (int j = 0; j <= 20; j++)
 		{
-			if (bombGrid[i][j])
+			if (bombTime[i][j])
 			{
 				grid[i][j] = 'B';
 				cout << grid[i][j];
@@ -106,54 +126,66 @@ void PlayerMovement(string playerDir)
 
 	grid[playerRow][playerCol] = 'P';
 }
-void Bomb()
+void Bomb(int bombRow, int bombCol)
 {
-	bombCount--;
-	int bombRow = playerRow;
-	int bombCol = playerCol;
-	bombGrid[bombRow][bombCol] = true;
-
-	this_thread::sleep_for(chrono::seconds(3));
-	bombGrid[bombRow][bombCol] = false;
 	bombCount++;
-	
 	if (grid[bombRow][bombCol] == 'P') gameOver = true;
 	grid[bombRow][bombCol] = 'X';
-	for (int i = 1; i <= bombLevel; i++)
-		if (grid[bombRow - i][bombCol] == ' ')
-			grid[bombRow - i][bombCol] = 'X';
-		else if (grid[bombRow - i][bombCol] == 'P')
-			gameOver = true;
-	for (int i = 1; i <= bombLevel; i++)
-		if (grid[bombRow + i][bombCol] == ' ')
-			grid[bombRow + i][bombCol] = 'X';
-		else if (grid[bombRow + i][bombCol] == 'P')
-			gameOver = true;
-	for (int i = 1; i <= bombLevel; i++)
-		if (grid[bombRow][bombCol + i] == ' ')
-			grid[bombRow][bombCol + i] = 'X';
-		else if (grid[bombRow][bombCol + i] == 'P')
-			gameOver = true;
-	for (int i = 1; i <= bombLevel; i++)
-		if (grid[bombRow][bombCol - i] == ' ')
-			grid[bombRow][bombCol - i] = 'X';
-		else if (grid[bombRow][bombCol - i] == 'P')
-			gameOver = true;
+	for (int dir = 0; dir < 4; dir++)
+	for (int dir = 0; dir < 4; dir++)
+	{
+		for (int r = 1; r <= bombLevel; r++)
+		{
+			int newRow = bombRow, newCol = bombCol;
 
-	this_thread::sleep_for(chrono::seconds(1));
-	grid[bombRow][bombCol] = ' ';
-	for (int i = 1; i <= bombLevel; i++)
-		if (grid[bombRow - i][bombCol] == 'X')
-			grid[bombRow - i][bombCol] = ' ';
-	for (int i = 1; i <= bombLevel; i++)
-		if (grid[bombRow + i][bombCol] == 'X')
-			grid[bombRow + i][bombCol] = ' ';
-	for (int i = 1; i <= bombLevel; i++)
-		if (grid[bombRow][bombCol + i] == 'X')
-			grid[bombRow][bombCol + i] = ' ';
-	for (int i = 1; i <= bombLevel; i++)
-		if (grid[bombRow][bombCol - i] == 'X')
-			grid[bombRow][bombCol - i] = ' ';
+			if (dir == 0) newRow = bombRow - r;
+			else if (dir == 1) newRow = bombRow + r;
+			else if (dir == 2) newCol = bombCol - r;
+			else if (dir == 3) newCol = bombCol + r;
+
+			if (newRow > 0 && newRow < HEIGHT && newCol > 0 && newCol < WIDTH)
+			{
+				if (newRow == playerRow && newCol == playerCol)
+				{
+					gameOver = true;
+				}
+				else if (grid[newRow][newCol] == ' ' || grid[newRow][newCol] == '+')
+				{
+					grid[newRow][newCol] = 'X';
+				}
+				else if (grid[newRow][newCol] == 'O')
+				{
+					grid[newRow][newCol] = 'X';
+					break;
+				}
+				else if (grid[newRow][newCol] == '#')
+				{
+					break;
+				}
+				else if (grid[newRow][newCol] == 'B')
+				{
+					grid[newRow][newCol] = 'X';
+				}
+			}
+		}
+	}
+}
+void BombTimer()
+{
+	for (int i = 0; i <= HEIGHT; i++)
+	{
+		for (int j = 0; j <= WIDTH; j++)
+		{
+			if (bombTime[i][j] > 0)
+			{
+				if (time(0) - bombTime[i][j] >= 3)
+				{
+					Bomb(i, j);
+					bombTime[i][j] = 0;
+				}
+			}
+		}
+	}
 }
 void Input()
 {
@@ -181,13 +213,11 @@ void Input()
 			break;
 		case 'b':
 		case ' ':
-		if (!bombGrid[playerRow][playerCol] && bombCount)
-		{
-			thread bombThread(Bomb);
-			bombThread.detach();
-
-			bombGrid[playerRow][playerCol] = true;
-		}
+			if (!bombTime[playerRow][playerCol] && bombCount)
+			{
+				bombTime[playerRow][playerCol] = time(0);
+				bombCount--;
+			}
 			break;
 		case 'x':
 			gameOver = true;
@@ -206,10 +236,13 @@ int main()
 	cout << "[ANY KEY] Play game" << endl;
 	_getch();
 	system("cls");
+
 	while (!gameOver)
 	{
 		Draw();
 		Input();
+		
+		BombTimer();
 	}
 	cout << "\nGame Over!" << endl;
 }
