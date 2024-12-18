@@ -1,8 +1,3 @@
-/*Added first game over condition
-Known issues:
-- One bomb's explosion clears another bomb's explosion
-*/
-
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
@@ -10,7 +5,7 @@ Known issues:
 using namespace std;
 
 bool gameOver = false;
-const int WIDTH = 31, HEIGHT = 11;
+const int WIDTH = 41, HEIGHT = 11;
 char grid[HEIGHT][WIDTH];
 int playerRow = 1, playerCol = 1, bombCount = 3, bombLevel = 2, obstacleCount = 20;
 string playerDir = "none";
@@ -18,15 +13,15 @@ time_t bombTime[HEIGHT][WIDTH];
 
 void Stage()
 {
-	for (int i = 0; i <= 10; i++)
+	for (int i = 0; i <= HEIGHT-1; i++)
 	{
-		for (int j = 0; j <= 20; j++)
+		for (int j = 0; j <= WIDTH-1; j++)
 		{
-			if (i == 0 || i == 10)
+			if (i == 0 || i == HEIGHT-1)
 			{
 				grid[i][j] = '-';
 			}
-			else if (j == 0 || j == 20)
+			else if (j == 0 || j == WIDTH-1)
 			{
 				grid[i][j] = '|';
 			}
@@ -52,7 +47,7 @@ void Stage()
 
 	while (obstacleCount)
 {
-	int obstacleRow = rand() % 10, obstacleCol = rand() % 20;
+	int obstacleRow = 1 + rand() % HEIGHT-2, obstacleCol = 1 + rand() % WIDTH-2;
 	if (grid[obstacleRow][obstacleCol] == ' ' &&
 		obstacleRow != playerRow + 1 && obstacleCol != playerCol && 
 		obstacleRow != playerRow - 1 && obstacleCol != playerCol &&
@@ -72,9 +67,9 @@ void Draw()
 	cout << "Player Row: " << playerRow << "\tPlayer Column: " << playerCol << endl;
 	cout << "Bombs: " << bombCount << endl;
 
-	for (int i = 0; i <= 10; i++)
+	for (int i = 0; i <= HEIGHT-1; i++)
 	{
-		for (int j = 0; j <= 20; j++)
+		for (int j = 0; j <= WIDTH-1; j++)
 		{
 			if (bombTime[i][j])
 			{
