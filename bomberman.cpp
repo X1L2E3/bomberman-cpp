@@ -1,13 +1,12 @@
 /*Added first game over condition
 Known issues:
 - One bomb's explosion clears another bomb's explosion
-- Bomb clear logic needs to be added now
 */
 
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
-// #include <thread>
+#include <thread>
 using namespace std;
 
 bool gameOver = false;
@@ -132,7 +131,6 @@ void Bomb(int bombRow, int bombCol)
 	if (grid[bombRow][bombCol] == 'P') gameOver = true;
 	grid[bombRow][bombCol] = 'X';
 	for (int dir = 0; dir < 4; dir++)
-	for (int dir = 0; dir < 4; dir++)
 	{
 		for (int r = 1; r <= bombLevel; r++)
 		{
@@ -169,6 +167,31 @@ void Bomb(int bombRow, int bombCol)
 			}
 		}
 	}
+
+	this_thread::sleep_for(chrono::seconds(1));
+
+	if (grid[bombRow][bombCol] == 'X' || grid[bombRow][bombCol] == '!') grid[bombRow][bombCol] = ' ';
+
+	for (int dir = 0; dir < 4; dir++)
+	{
+		for (int r = 1; r <= bombLevel; r++)
+		{
+			int newRow = bombRow, newCol = bombCol;
+
+			if (dir == 0) newRow = bombRow - r;
+			else if (dir == 1) newRow = bombRow + r;
+			else if (dir == 2) newCol = bombCol - r;
+			else if (dir == 3) newCol = bombCol + r;
+
+			if (newRow > 0 && newRow < HEIGHT && newCol > 0 && newCol < WIDTH)
+			{
+				if (grid[newRow][newCol] == 'X' || grid[newRow][newCol] == '!')
+				{
+					grid[newRow][newCol] = ' ';
+				}
+			}
+		}
+	}
 }
 void BombTimer()
 {
@@ -180,7 +203,8 @@ void BombTimer()
 			{
 				if (time(0) - bombTime[i][j] >= 3)
 				{
-					Bomb(i, j);
+					thread bombThread(Bomb, i, j);
+					bombThread.detach();
 					bombTime[i][j] = 0;
 				}
 			}
