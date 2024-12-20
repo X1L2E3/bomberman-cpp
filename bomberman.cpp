@@ -5,11 +5,11 @@
 using namespace std;
 
 bool gameOver = false;
-const int WIDTH = 41, HEIGHT = 11;
-char grid[HEIGHT][WIDTH];
+const int ROWS = 11, COLS = 41;
+char grid[ROWS][COLS];
 int playerRow = 1, playerCol = 1, bombCount = 3, bombLevel = 2, obstacleCount = 20;
 string playerDir = "none";
-time_t bombTime[HEIGHT][WIDTH];
+time_t bombTime[ROWS][COLS];
 
 void SetCursorPosition(short int x, short int y)
 {
@@ -17,18 +17,23 @@ void SetCursorPosition(short int x, short int y)
 	COORD CursorPos = {x, y};
 	SetConsoleCursorPosition(hConsole, CursorPos);
 }
+void SetConsoleColor(int c)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, c);
+}
 
 void Stage()
 {
-	for (int i = 0; i <= HEIGHT-1; i++)
+	for (int i = 0; i <= ROWS-1; i++)
 	{
-		for (int j = 0; j <= WIDTH-1; j++)
+		for (int j = 0; j <= COLS-1; j++)
 		{
-			if (i == 0 || i == HEIGHT-1)
+			if (i == 0 || i == ROWS-1)
 			{
 				grid[i][j] = '-';
 			}
-			else if (j == 0 || j == WIDTH-1)
+			else if (j == 0 || j == COLS-1)
 			{
 				grid[i][j] = '|';
 			}
@@ -42,29 +47,28 @@ void Stage()
 			}
 		}
 	}
-	grid[playerRow][playerCol] = 'P';
 
-	for (int i = 0; i <= HEIGHT; i++)
+	for (int i = 0; i <= ROWS; i++)
 	{
-		for (int j = 0; j <= WIDTH; j++)
+		for (int j = 0; j <= COLS; j++)
 		{
 			bombTime[i][j] = 0;
 		}
 	}
 
 	while (obstacleCount)
-{
-	int obstacleRow = 1 + rand() % HEIGHT-2, obstacleCol = 1 + rand() % WIDTH-2;
-	if (grid[obstacleRow][obstacleCol] == ' ' &&
-		obstacleRow != playerRow + 1 && obstacleCol != playerCol && 
-		obstacleRow != playerRow - 1 && obstacleCol != playerCol &&
-		obstacleRow != playerRow && obstacleCol != playerCol + 1 &&
-		obstacleRow != playerRow && obstacleCol != playerCol - 1)
 	{
-		grid[obstacleRow][obstacleCol] = 'O';
-		obstacleCount--;
+		int obstacleRow = 1 + rand() % ROWS-2, obstacleCol = 1 + rand() % COLS-2;
+		if (grid[obstacleRow][obstacleCol] == ' ' &&
+			obstacleRow != playerRow + 1 && obstacleCol != playerCol && 
+			obstacleRow != playerRow - 1 && obstacleCol != playerCol &&
+			obstacleRow != playerRow && obstacleCol != playerCol + 1 &&
+			obstacleRow != playerRow && obstacleCol != playerCol - 1)
+		{
+			grid[obstacleRow][obstacleCol] = 'O';
+			obstacleCount--;
+		}
 	}
-}
 }
 void Draw()
 {
@@ -74,17 +78,25 @@ void Draw()
 	cout << "Player Row: " << playerRow << "\tPlayer Column: " << playerCol << endl;
 	cout << "Bombs: " << bombCount << endl;
 
-	for (int i = 0; i <= HEIGHT-1; i++)
+	for (int i = 0; i <= ROWS-1; i++)
 	{
-		for (int j = 0; j <= WIDTH-1; j++)
+		for (int j = 0; j <= COLS-1; j++)
 		{
 			if (bombTime[i][j])
 			{
+				SetConsoleColor(4);
 				grid[i][j] = 'B';
 				cout << grid[i][j];
 			}
+			else if (playerRow == i && playerCol == j)
+			{
+				SetConsoleColor(5);
+				grid[i][j] = 'P';
+				cout << 'P';
+			}
 			else
 			{
+				SetConsoleColor(1);
 				cout << grid[i][j];
 			}
 		}
@@ -124,8 +136,6 @@ void PlayerMovement(string playerDir)
 		else if (grid[playerRow][playerCol - 1] == 'X')
 			gameOver = true;
 	}
-
-	grid[playerRow][playerCol] = 'P';
 }
 void Bomb(int bombRow, int bombCol)
 {
@@ -143,7 +153,7 @@ void Bomb(int bombRow, int bombCol)
 			else if (dir == 2) newCol = bombCol - r;
 			else if (dir == 3) newCol = bombCol + r;
 
-			if (newRow > 0 && newRow < HEIGHT && newCol > 0 && newCol < WIDTH)
+			if (newRow > 0 && newRow < ROWS && newCol > 0 && newCol < COLS)
 			{
 				if (newRow == playerRow && newCol == playerCol)
 				{
@@ -185,7 +195,7 @@ void Bomb(int bombRow, int bombCol)
 			else if (dir == 2) newCol = bombCol - r;
 			else if (dir == 3) newCol = bombCol + r;
 
-			if (newRow > 0 && newRow < HEIGHT && newCol > 0 && newCol < WIDTH)
+			if (newRow > 0 && newRow < ROWS && newCol > 0 && newCol < COLS)
 			{
 				if (grid[newRow][newCol] == 'X' || grid[newRow][newCol] == '!')
 				{
@@ -197,9 +207,9 @@ void Bomb(int bombRow, int bombCol)
 }
 void BombTimer()
 {
-	for (int i = 0; i <= HEIGHT; i++)
+	for (int i = 0; i <= ROWS; i++)
 	{
-		for (int j = 0; j <= WIDTH; j++)
+		for (int j = 0; j <= COLS; j++)
 		{
 			if (bombTime[i][j] > 0)
 			{
