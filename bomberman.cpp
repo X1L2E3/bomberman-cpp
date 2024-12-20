@@ -7,7 +7,8 @@ using namespace std;
 bool gameOver = false;
 const int ROWS = 11, COLS = 41;
 char grid[ROWS][COLS];
-int playerRow = 1, playerCol = 1, playerScore = 0, bombCount = 3, bombLevel = 2, obstacleCount = 20;
+int playerRow = 1, playerCol = 1, playerScore = 0;
+int bombCount = 3, bombLevel = 2, obstacleCount = 20, powerupCount = 5;
 string playerDir = "none";
 time_t bombTime[ROWS][COLS];
 
@@ -32,27 +33,43 @@ void Menu()
 	_getch();
 	system("cls");
 }
+void StageObstacles(int obstacles)
+{
+	while (obstacles)
+	{
+		int r = 1 + rand() % ROWS-2, c = 1 + rand() % COLS-2;
+		if (grid[r][c] == ' ' &&
+			r != playerRow + 1 && c != playerCol && 
+			r != playerRow + 2 && c != playerCol &&
+			r != playerRow && c != playerCol + 1 &&
+			r != playerRow && c != playerCol + 2)
+		{
+			grid[r][c] = 'O';
+			obstacles--;
+		}
+	}
+}
 void Stage()
 {
-	for (int i = 0; i <= ROWS-1; i++)
+	for (int r = 0; r <= ROWS-1; r++)
 	{
-		for (int j = 0; j <= COLS-1; j++)
+		for (int c = 0; c <= COLS-1; c++)
 		{
-			if (i == 0 || i == ROWS-1)
+			if (r == 0 || r == ROWS-1)
 			{
-				grid[i][j] = '-';
+				grid[r][c] = '-';
 			}
-			else if (j == 0 || j == COLS-1)
+			else if (c == 0 || c == COLS-1)
 			{
-				grid[i][j] = '|';
+				grid[r][c] = '|';
 			}
-			else if (i % 2 == 0 && j % 2 == 0)
+			else if (r % 2 == 0 && c % 2 == 0)
 			{
-				grid[i][j] = '#';
+				grid[r][c] = '#';
 			}
 			else
 			{
-				grid[i][j] = ' ';
+				grid[r][c] = ' ';
 			}
 		}
 	}
@@ -65,20 +82,9 @@ void Stage()
 		}
 	}
 
-	while (obstacleCount)
-	{
-		int obstacleRow = 1 + rand() % ROWS-2, obstacleCol = 1 + rand() % COLS-2;
-		if (grid[obstacleRow][obstacleCol] == ' ' &&
-			obstacleRow != playerRow + 1 && obstacleCol != playerCol && 
-			obstacleRow != playerRow - 1 && obstacleCol != playerCol &&
-			obstacleRow != playerRow && obstacleCol != playerCol + 1 &&
-			obstacleRow != playerRow && obstacleCol != playerCol - 1)
-		{
-			grid[obstacleRow][obstacleCol] = 'O';
-			obstacleCount--;
-		}
-	}
+	StageObstacles(obstacleCount);
 }
+
 void Draw()
 {
 	SetCursorPosition(0, 0);
@@ -126,38 +132,34 @@ void Draw()
 		cout << endl;
 	}
 }
-void PlayerMovement(string playerDir)
+void PlayerMovement(char playerDir)
 {
-	if (grid[playerRow][playerCol] == 'P')
-		grid[playerRow][playerCol] = ' ';
+	if (playerDir != 'n')
+	{
+		int newRow = playerRow;
+		int newCol = playerCol;
 
-	if (playerDir == "up")
-	{
-		if (grid[playerRow - 1][playerCol] == ' ')
-			playerRow--;
-		else if (grid[playerRow - 1][playerCol] == 'X')
+		if (playerDir == 'u')
+			newRow--;
+		else if (playerDir == 'd')
+			newRow++;
+		else if (playerDir == 'r')
+			newCol++;
+		else if (playerDir == 'l')
+			newCol--;
+
+		if (grid[playerRow][playerCol] == 'P')
+			grid[playerRow][playerCol] = ' ';
+
+		if (grid[newRow][newCol] == ' ')
+		{
+			playerRow = newRow;
+			playerCol = newCol;
+		}
+		else if (grid[newRow][newCol] == 'X')
+		{
 			gameOver = true;
-	}
-	else if (playerDir == "down")
-	{
-		if (grid[playerRow + 1][playerCol] == ' ')
-			playerRow++;
-		else if (grid[playerRow + 1][playerCol] == 'X')
-			gameOver = true;
-	}
-	else if (playerDir == "right")
-	{
-		if (grid[playerRow][playerCol + 1] == ' ')
-			playerCol++;
-		else if (grid[playerRow][playerCol + 1] == 'X')
-			gameOver = true;
-	}
-	else if (playerDir == "left")
-	{
-		if (grid[playerRow][playerCol - 1] == ' ')
-			playerCol--;
-		else if (grid[playerRow][playerCol - 1] == 'X')
-			gameOver = true;
+		}
 	}
 }
 void Score(char type)
@@ -249,17 +251,17 @@ void Bomb(int bombRow, int bombCol)
 }
 void BombTimer()
 {
-	for (int i = 0; i <= ROWS; i++)
+	for (int r = 0; r <= ROWS; r++)
 	{
-		for (int j = 0; j <= COLS; j++)
+		for (int c = 0; c <= COLS; c++)
 		{
-			if (bombTime[i][j] > 0)
+			if (bombTime[r][c] > 0)
 			{
-				if (time(0) - bombTime[i][j] >= 3)
+				if (time(0) - bombTime[r][c] >= 3)
 				{
-					thread bombThread(Bomb, i, j);
+					thread bombThread(Bomb, r, c);
 					bombThread.detach();
-					bombTime[i][j] = 0;
+					bombTime[r][c] = 0;
 				}
 			}
 		}
@@ -267,7 +269,7 @@ void BombTimer()
 }
 void Input()
 {
-	string playerDir = "none";
+	char playerDir = 'n';
 
 	if (_kbhit())
 	{
@@ -275,19 +277,19 @@ void Input()
 		{
 		case 'w':
 		case 72:
-			playerDir = "up";
+			playerDir = 'u';
 			break;
 		case 's':
 		case 80:
-			playerDir = "down";
+			playerDir = 'd';
 			break;
 		case 'd':
 		case 77:
-			playerDir = "right";
+			playerDir = 'r';
 			break;
 		case 'a':
 		case 75:
-			playerDir = "left";
+			playerDir = 'l';
 			break;
 		case 'b':
 		case ' ':
