@@ -11,6 +11,13 @@ int playerRow = 1, playerCol = 1, bombCount = 3, bombLevel = 2, obstacleCount = 
 string playerDir = "none";
 time_t bombTime[HEIGHT][WIDTH];
 
+void SetCursorPosition(short int x, short int y)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD CursorPos = {x, y};
+	SetConsoleCursorPosition(hConsole, CursorPos);
+}
+
 void Stage()
 {
 	for (int i = 0; i <= HEIGHT-1; i++)
@@ -61,7 +68,7 @@ void Stage()
 }
 void Draw()
 {
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
+	SetCursorPosition(0, 0);
 
 	// For debugging
 	cout << "Player Row: " << playerRow << "\tPlayer Column: " << playerCol << endl;
