@@ -23,6 +23,15 @@ void SetConsoleColor(int c)
 	SetConsoleTextAttribute(hConsole, c);
 }
 
+void Menu()
+{
+	cout << "Bomber man" << endl;
+	cout << "Press b to place bomb, w, a, s, d to move" << endl;
+	cout << "Press x to quit" << endl;
+	cout << "[ANY KEY] Play game" << endl;
+	_getch();
+	system("cls");
+}
 void Stage()
 {
 	for (int i = 0; i <= ROWS-1; i++)
@@ -86,19 +95,34 @@ void Draw()
 			{
 				SetConsoleColor(4);
 				grid[i][j] = 'B';
-				cout << grid[i][j];
 			}
 			else if (playerRow == i && playerCol == j)
 			{
 				SetConsoleColor(5);
 				grid[i][j] = 'P';
-				cout << 'P';
 			}
 			else
 			{
-				SetConsoleColor(1);
-				cout << grid[i][j];
+				switch (grid[i][j])
+				{
+				case '-':
+				case '|':
+					SetConsoleColor(2);
+					break;
+				case 'X':
+					SetConsoleColor(4);
+					break;
+				case '#':
+					SetConsoleColor(7);
+					break;
+				case 'O':
+					SetConsoleColor(6);
+					break;
+				default:
+					SetConsoleColor(8);
+				}
 			}
+			cout << grid[i][j];
 		}
 		cout << endl;
 	}
@@ -265,14 +289,9 @@ void Input()
 
 int main()
 {
+	Menu();
 	Stage();
-	cout << "Bomberman" << endl;
-	cout << "Press b to place bomb, w, a, s, d to move" << endl;
-	cout << "Press x to quit" << endl;
-	cout << "[ANY KEY] Play game" << endl;
-	_getch();
-	system("cls");
-
+	
 	while (!gameOver)
 	{
 		Draw();
