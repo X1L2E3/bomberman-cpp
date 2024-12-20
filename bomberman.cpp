@@ -49,6 +49,22 @@ void StageObstacles(int obstacles)
 		}
 	}
 }
+void StagePowerups(int powerups)
+{
+	while (powerups)
+	{
+		int r = 1 + rand() % ROWS-2, c = 1 + rand() % COLS-2;
+		if (grid[r][c] == ' ' &&
+			r != playerRow + 1 && c != playerCol && 
+			r != playerRow + 2 && c != playerCol &&
+			r != playerRow && c != playerCol + 1 &&
+			r != playerRow && c != playerCol + 2)
+		{
+			grid[r][c] = '+';
+			powerups--;
+		}
+	}
+}
 void Stage()
 {
 	for (int r = 0; r <= ROWS-1; r++)
@@ -83,8 +99,8 @@ void Stage()
 	}
 
 	StageObstacles(obstacleCount);
+	StagePowerups(powerupCount);
 }
-
 void Draw()
 {
 	SetCursorPosition(0, 0);
@@ -132,6 +148,15 @@ void Draw()
 		cout << endl;
 	}
 }
+
+void PlayerInteraction(char object)
+{
+	switch (object)
+	{
+	case '+':
+		bombCount++;
+	}
+}
 void PlayerMovement(char playerDir)
 {
 	if (playerDir != 'n')
@@ -153,6 +178,12 @@ void PlayerMovement(char playerDir)
 
 		if (grid[newRow][newCol] == ' ')
 		{
+			playerRow = newRow;
+			playerCol = newCol;
+		}
+		else if (grid[newRow][newCol] == 'E' || grid[newRow][newCol] == '+')
+		{
+			PlayerInteraction(grid[newRow][newCol]);
 			playerRow = newRow;
 			playerCol = newCol;
 		}
