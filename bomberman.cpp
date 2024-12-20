@@ -7,7 +7,7 @@ using namespace std;
 bool gameOver = false;
 const int ROWS = 11, COLS = 41;
 char grid[ROWS][COLS];
-int playerRow = 1, playerCol = 1, bombCount = 3, bombLevel = 2, obstacleCount = 20;
+int playerRow = 1, playerCol = 1, playerScore = 0, bombCount = 3, bombLevel = 2, obstacleCount = 20;
 string playerDir = "none";
 time_t bombTime[ROWS][COLS];
 
@@ -85,7 +85,7 @@ void Draw()
 
 	// For debugging
 	cout << "Player Row: " << playerRow << "\tPlayer Column: " << playerCol << endl;
-	cout << "Bombs: " << bombCount << endl;
+	cout << "Score: " << playerScore << "\tBombs: " << bombCount << endl;
 
 	for (int i = 0; i <= ROWS-1; i++)
 	{
@@ -94,7 +94,6 @@ void Draw()
 			if (bombTime[i][j])
 			{
 				SetConsoleColor(4);
-				grid[i][j] = 'B';
 			}
 			else if (playerRow == i && playerCol == j)
 			{
@@ -161,9 +160,23 @@ void PlayerMovement(string playerDir)
 			gameOver = true;
 	}
 }
+void Score(char type)
+{
+	switch (type)
+	{
+	case 'O':
+		playerScore += 10;
+		break;
+	case 'E':
+		playerScore += 50;
+	}
+
+}
 void Bomb(int bombRow, int bombCol)
 {
 	bombCount++;
+
+	bool forced = false;
 	if (grid[bombRow][bombCol] == 'P') gameOver = true;
 	grid[bombRow][bombCol] = 'X';
 	for (int dir = 0; dir < 4; dir++)
@@ -187,8 +200,9 @@ void Bomb(int bombRow, int bombCol)
 				{
 					grid[newRow][newCol] = 'X';
 				}
-				else if (grid[newRow][newCol] == 'O')
+				else if (grid[newRow][newCol] == 'O' || grid[newRow][newCol] == 'E')
 				{
+					Score(grid[newRow][newCol]);
 					grid[newRow][newCol] = 'X';
 					break;
 				}
@@ -198,13 +212,17 @@ void Bomb(int bombRow, int bombCol)
 				}
 				else if (grid[newRow][newCol] == 'B')
 				{
+					forced = true;
+					Bomb(newRow, newCol);
+					bombTime[newRow][newCol] = 0;
 					grid[newRow][newCol] = 'X';
 				}
 			}
 		}
 	}
 
-	this_thread::sleep_for(chrono::seconds(1));
+	if (!forced)
+		this_thread::sleep_for(chrono::seconds(1));
 
 	if (grid[bombRow][bombCol] == 'X' || grid[bombRow][bombCol] == '!') grid[bombRow][bombCol] = ' ';
 
@@ -277,6 +295,7 @@ void Input()
 			{
 				bombTime[playerRow][playerCol] = time(0);
 				bombCount--;
+				grid[playerRow][playerCol] = 'B';
 			}
 			break;
 		case 'x':
