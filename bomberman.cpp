@@ -9,7 +9,6 @@ const int ROWS = 11, COLS = 41;
 char grid[ROWS][COLS];
 int playerRow = 1, playerCol = 1, playerScore = 0;
 int bombCount = 3, bombLevel = 2, obstacleCount = 20, powerupCount = 5;
-string playerDir = "none";
 time_t bombTime[ROWS][COLS];
 
 void SetCursorPosition(short int x, short int y)
@@ -155,6 +154,10 @@ void PlayerInteraction(char object)
 	{
 	case '+':
 		bombCount++;
+		playerScore += 20;
+		break;
+	case 'X':
+		gameOver = true;
 	}
 }
 void PlayerMovement(char playerDir)
@@ -181,15 +184,11 @@ void PlayerMovement(char playerDir)
 			playerRow = newRow;
 			playerCol = newCol;
 		}
-		else if (grid[newRow][newCol] == 'E' || grid[newRow][newCol] == '+')
+		else if (grid[newRow][newCol] == 'E' || grid[newRow][newCol] == '+' || grid[newRow][newCol] == 'X')
 		{
 			PlayerInteraction(grid[newRow][newCol]);
 			playerRow = newRow;
 			playerCol = newCol;
-		}
-		else if (grid[newRow][newCol] == 'X')
-		{
-			gameOver = true;
 		}
 	}
 }
@@ -245,10 +244,13 @@ void Bomb(int bombRow, int bombCol)
 				}
 				else if (grid[newRow][newCol] == 'B')
 				{
-					forced = true;
-					Bomb(newRow, newCol);
-					bombTime[newRow][newCol] = 0;
-					grid[newRow][newCol] = 'X';
+					if (bombTime[newRow][newCol] > 0)
+					{
+						forced = true;
+						Bomb(newRow, newCol);
+						bombTime[newRow][newCol] = 0;
+						grid[newRow][newCol] = 'X';
+					}
 				}
 			}
 		}
