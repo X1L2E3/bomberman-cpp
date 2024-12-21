@@ -8,8 +8,8 @@ bool gameOver = false;
 const int ROWS = 11, COLS = 41;
 char grid[ROWS][COLS];
 int playerRow = 1, playerCol = 1, playerScore = 0;
-int bombCount = 3, bombLevel = 2, obstacleCount = 20, powerupCount = 5;
-time_t bombTime[ROWS][COLS];
+int enemyPos[ROWS][COLS], bombCount = 3, bombLevel = 2, obstacleCount = 20, powerupCount = 5, enemyCount = 3;
+time_t bombTime[ROWS][COLS], enemyTime = time(0);
 
 void SetCursorPosition(short int x, short int y)
 {
@@ -25,10 +25,10 @@ void SetConsoleColor(int c)
 
 void Menu()
 {
-	cout << "Bomber man" << endl;
-	cout << "Press b to place bomb, w, a, s, d to move" << endl;
-	cout << "Press x to quit" << endl;
-	cout << "[ANY KEY] Play game" << endl;
+	cout << "\n\tBomber man" << endl;
+	cout << "\tPress b to place bomb, w, a, s, d to move" << endl;
+	cout << "\tPress x to quit" << endl;
+	cout << "\n\t[ANY KEY] Play game" << endl;
 	_getch();
 	system("cls");
 }
@@ -45,6 +45,24 @@ void StageObstacles(int obstacles)
 		{
 			grid[r][c] = 'O';
 			obstacles--;
+		}
+	}
+}
+void StageEnemies(int enemies)
+{
+	int i = 0;
+	while (enemies)
+	{
+		int enemyRow = rand() % ROWS - 1, enemyCol = rand() % COLS - 1;
+		if (grid[enemyRow][enemyCol] == ' ' &&
+			!(enemyRow == 1 || enemyRow == 2 || enemyRow == 3 ||
+				enemyCol == 1 || enemyCol == 2 || enemyCol == 3))
+		{
+			enemyPos[0][i] = enemyRow;
+			enemyPos[1][i] = enemyCol;
+			grid[enemyRow][enemyCol] = 'E';
+			enemies--;
+			i++;
 		}
 	}
 }
@@ -66,6 +84,8 @@ void StagePowerups(int powerups)
 }
 void Stage()
 {
+	enemyTime = time(0);
+
 	for (int r = 0; r <= ROWS-1; r++)
 	{
 		for (int c = 0; c <= COLS-1; c++)
@@ -99,6 +119,7 @@ void Stage()
 
 	StageObstacles(obstacleCount);
 	StagePowerups(powerupCount);
+	StageEnemies(enemyCount);
 }
 void Draw()
 {
@@ -148,6 +169,56 @@ void Draw()
 	}
 }
 
+void Enemy()
+{
+	for (int i = 0; i < COLS; i++)
+	{
+		if (grid[enemyPos[0][i]][enemyPos[1][i]] == 'E')
+		{
+			int x = enemyPos[0][i];
+			int y = enemyPos[1][i];
+
+			int direction = rand() % 4;
+			int newX = x, newY = y;
+
+			if (direction == 0)
+				newX--;
+			else if (direction == 1)
+				newX++;
+			else if (direction == 2)
+				newY--;
+			else if (direction == 3)
+				newY++;
+
+			if (newX == playerRow && newY == playerCol)
+			{
+				gameOver = true;
+			}
+			else if (grid[newX][newY] == 'X')
+			{
+				grid[x][y] = ' ';
+				break;
+			}
+			else if (grid[newX][newY] == ' ')
+			{
+				grid[x][y] = ' ';
+				grid[newX][newY] = 'E';
+				enemyPos[0][i] = newX;
+				enemyPos[1][i] = newY;
+			}
+		}
+		else if (enemyPos[0][i] == -1 && enemyPos[1][i] == -1)
+			break;
+	}
+}
+void EnemyTimer()
+{
+	if (time(0) - enemyTime >= 3)
+	{
+		Enemy();
+		enemyTime = time(0);
+	}
+}
 void PlayerInteraction(char object)
 {
 	switch (object)
@@ -162,34 +233,31 @@ void PlayerInteraction(char object)
 }
 void PlayerMovement(char playerDir)
 {
-	if (playerDir != 'n')
+	int newRow = playerRow;
+	int newCol = playerCol;
+
+	if (playerDir == 'u')
+		newRow--;
+	else if (playerDir == 'd')
+		newRow++;
+	else if (playerDir == 'r')
+		newCol++;
+	else if (playerDir == 'l')
+		newCol--;
+
+	if (grid[playerRow][playerCol] == 'P')
+		grid[playerRow][playerCol] = ' ';
+
+	if (grid[newRow][newCol] == ' ')
 	{
-		int newRow = playerRow;
-		int newCol = playerCol;
-
-		if (playerDir == 'u')
-			newRow--;
-		else if (playerDir == 'd')
-			newRow++;
-		else if (playerDir == 'r')
-			newCol++;
-		else if (playerDir == 'l')
-			newCol--;
-
-		if (grid[playerRow][playerCol] == 'P')
-			grid[playerRow][playerCol] = ' ';
-
-		if (grid[newRow][newCol] == ' ')
-		{
-			playerRow = newRow;
-			playerCol = newCol;
-		}
-		else if (grid[newRow][newCol] == 'E' || grid[newRow][newCol] == '+' || grid[newRow][newCol] == 'X')
-		{
-			PlayerInteraction(grid[newRow][newCol]);
-			playerRow = newRow;
-			playerCol = newCol;
-		}
+		playerRow = newRow;
+		playerCol = newCol;
+	}
+	else if (grid[newRow][newCol] == 'E' || grid[newRow][newCol] == '+' || grid[newRow][newCol] == 'X')
+	{
+		PlayerInteraction(grid[newRow][newCol]);
+		playerRow = newRow;
+		playerCol = newCol;
 	}
 }
 void Score(char type)
@@ -226,6 +294,7 @@ void Bomb(int bombRow, int bombCol)
 			{
 				if (newRow == playerRow && newCol == playerCol)
 				{
+					grid[newRow][newCol] = '!';
 					gameOver = true;
 				}
 				else if (grid[newRow][newCol] == ' ' || grid[newRow][newCol] == '+')
@@ -333,11 +402,12 @@ void Input()
 				grid[playerRow][playerCol] = 'B';
 			}
 			break;
-		case 'x':
+		case 27:
+		case 8:
 			gameOver = true;
 			break;
 		}
-		PlayerMovement(playerDir);
+		if (playerDir != 'n') PlayerMovement(playerDir);
 	}
 }
 
@@ -350,7 +420,8 @@ int main()
 	{
 		Draw();
 		Input();
-		
+
+		EnemyTimer();
 		BombTimer();
 	}
 	cout << "\nGame Over!" << endl;
