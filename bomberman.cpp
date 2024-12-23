@@ -1,3 +1,8 @@
+/*
+Known issues:
+- Enemy does not change direction after making 5 moves (which should happen)
+*/
+
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
@@ -8,7 +13,7 @@ bool gameOver = false;
 const int ROWS = 11, COLS = 41;
 char grid[ROWS][COLS];
 int playerRow = 1, playerCol = 1, playerScore = 0;
-int enemyPos[ROWS][COLS], bombCount = 3, bombLevel = 2, obstacleCount = 20, powerupCount = 5, enemyCount = 3;
+int enemyPos[4][COLS], bombCount = 3, bombLevel = 2, obstacleCount = 20, powerupCount = 5, enemyCount = 3;
 time_t bombTime[ROWS][COLS], enemyTime = time(0);
 
 void SetCursorPosition(short int x, short int y)
@@ -53,14 +58,18 @@ void StageEnemies(int enemies)
 	int i = 0;
 	while (enemies)
 	{
-		int enemyRow = rand() % ROWS - 1, enemyCol = rand() % COLS - 1;
-		if (grid[enemyRow][enemyCol] == ' ' &&
-			!(enemyRow == 1 || enemyRow == 2 || enemyRow == 3 ||
-				enemyCol == 1 || enemyCol == 2 || enemyCol == 3))
+		int r = rand() % ROWS - 1, c = rand() % COLS - 1, d = rand() % 4;
+		if (grid[r][c] == ' ' &&
+			r != playerRow + 1 && c != playerCol && 
+			r != playerRow + 2 && c != playerCol &&
+			r != playerRow && c != playerCol + 1 &&
+			r != playerRow && c != playerCol + 2)
 		{
-			enemyPos[0][i] = enemyRow;
-			enemyPos[1][i] = enemyCol;
-			grid[enemyRow][enemyCol] = 'E';
+			enemyPos[0][i] = r;		// Row
+			enemyPos[1][i] = c;		// Column
+			enemyPos[2][i] = d;		// Direction
+			enemyPos[3][i] = 0;		// Move count
+			grid[r][c] = 'E';
 			enemies--;
 			i++;
 		}
@@ -171,49 +180,62 @@ void Draw()
 
 void Enemy()
 {
-	for (int i = 0; i < COLS; i++)
+	// This logic is very simple and needs to be improved
+	for (int i = 0; i < enemyCount; i++)
 	{
 		if (grid[enemyPos[0][i]][enemyPos[1][i]] == 'E')
 		{
-			int x = enemyPos[0][i];
-			int y = enemyPos[1][i];
+			int r = enemyPos[0][i];
+			int c = enemyPos[1][i];
+			int dir = enemyPos[2][i];
+			int moves = enemyPos[3][i];
 
-			int direction = rand() % 4;
-			int newX = x, newY = y;
+			int newR = r, newC = c;
 
-			if (direction == 0)
-				newX--;
-			else if (direction == 1)
-				newX++;
-			else if (direction == 2)
-				newY--;
-			else if (direction == 3)
-				newY++;
+			if (dir == 0)
+				newR--;
+			else if (dir == 1)
+				newR++;
+			else if (dir == 2)
+				newC--;
+			else if (dir == 3)
+				newC++;
 
-			if (newX == playerRow && newY == playerCol)
+			if (newR == playerRow && newC == playerCol)
 			{
 				gameOver = true;
 			}
-			else if (grid[newX][newY] == 'X')
+			else if (grid[newR][newC] == 'X')
 			{
-				grid[x][y] = ' ';
+				grid[r][c] = ' ';
 				break;
 			}
-			else if (grid[newX][newY] == ' ')
+			else if (grid[newR][newC] == ' ')
 			{
-				grid[x][y] = ' ';
-				grid[newX][newY] = 'E';
-				enemyPos[0][i] = newX;
-				enemyPos[1][i] = newY;
+				grid[r][c] = ' ';
+				grid[newR][newC] = 'E';
+				enemyPos[0][i] = newR;
+				enemyPos[1][i] = newC;
+				if (moves == 5)
+				{
+					enemyPos[2][i] = rand() % 4;
+					enemyPos[3][i] = 0;
+				}
+				else
+				{
+					enemyPos[3][i]++;
+				}
+			}
+			else
+			{
+				enemyPos[2][i] = rand() % 4;
 			}
 		}
-		else if (enemyPos[0][i] == -1 && enemyPos[1][i] == -1)
-			break;
 	}
 }
 void EnemyTimer()
 {
-	if (time(0) - enemyTime >= 3)
+	if (time(0) - enemyTime >= 1)
 	{
 		Enemy();
 		enemyTime = time(0);
@@ -228,6 +250,7 @@ void PlayerInteraction(char object)
 		playerScore += 20;
 		break;
 	case 'X':
+	case 'E':
 		gameOver = true;
 	}
 }
