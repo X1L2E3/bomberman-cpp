@@ -1,8 +1,3 @@
-/*
-Feature to add:
-- Enemy should chase player
-*/
-
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
@@ -91,6 +86,8 @@ void StagePowerups(int powerups)
 	{
 		int r = 1 + rand() % ROWS-2, c = 1 + rand() % COLS-2;
 		if (grid[r][c] == ' ' &&
+			grid[r+1][c] != '+' &&grid[r-1][c] != '+' &&
+			grid[r][c+1] != '+' && grid[r][c-1] != '+' &&
 			r != playerRow + 1 && c != playerCol && 
 			r != playerRow + 2 && c != playerCol &&
 			r != playerRow && c != playerCol + 1 &&
