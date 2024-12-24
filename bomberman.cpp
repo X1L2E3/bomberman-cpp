@@ -1,6 +1,6 @@
 /*
-Known issues:
-- Enemy does not change direction after making 5 moves (which should happen)
+Feature to add:
+- Enemy should chase player
 */
 
 #include <iostream>
@@ -178,9 +178,8 @@ void Draw()
 	}
 }
 
-void Enemy()
+void EnemyMovement()
 {
-	// This logic is very simple and needs to be improved
 	for (int i = 0; i < enemyCount; i++)
 	{
 		if (grid[enemyPos[0][i]][enemyPos[1][i]] == 'E')
@@ -190,7 +189,8 @@ void Enemy()
 			int dir = enemyPos[2][i];
 			int moves = enemyPos[3][i];
 
-			int newR = r, newC = c;
+			int newR = r;
+			int newC = c;
 
 			if (dir == 0)
 				newR--;
@@ -200,6 +200,7 @@ void Enemy()
 				newC--;
 			else if (dir == 3)
 				newC++;
+			moves++;
 
 			if (newR == playerRow && newC == playerCol)
 			{
@@ -212,18 +213,18 @@ void Enemy()
 			}
 			else if (grid[newR][newC] == ' ')
 			{
-				grid[r][c] = ' ';
-				grid[newR][newC] = 'E';
-				enemyPos[0][i] = newR;
-				enemyPos[1][i] = newC;
-				if (moves == 5)
+				if (moves <= 4)
 				{
-					enemyPos[2][i] = rand() % 4;
-					enemyPos[3][i] = 0;
+					grid[r][c] = ' ';
+					grid[newR][newC] = 'E';
+					enemyPos[0][i] = newR;
+					enemyPos[1][i] = newC;
+					enemyPos[3][i] = moves;
 				}
 				else
 				{
-					enemyPos[3][i]++;
+					enemyPos[2][i] = rand() % 4;
+					enemyPos[3][i] = 0;
 				}
 			}
 			else
@@ -237,7 +238,7 @@ void EnemyTimer()
 {
 	if (time(0) - enemyTime >= 1)
 	{
-		Enemy();
+		EnemyMovement();
 		enemyTime = time(0);
 	}
 }
@@ -295,7 +296,7 @@ void Score(char type)
 	}
 
 }
-void Bomb(int bombRow, int bombCol)
+void BombExplosion(int bombRow, int bombCol)
 {
 	bombCount++;
 
@@ -339,7 +340,7 @@ void Bomb(int bombRow, int bombCol)
 					if (bombTime[newRow][newCol] > 0)
 					{
 						forced = true;
-						Bomb(newRow, newCol);
+						BombExplosion(newRow, newCol);
 						bombTime[newRow][newCol] = 0;
 						grid[newRow][newCol] = 'X';
 					}
@@ -384,7 +385,7 @@ void BombTimer()
 			{
 				if (time(0) - bombTime[r][c] >= 3)
 				{
-					thread bombThread(Bomb, r, c);
+					thread bombThread(BombExplosion, r, c);
 					bombThread.detach();
 					bombTime[r][c] = 0;
 				}
@@ -436,6 +437,8 @@ void Input()
 
 int main()
 {
+	srand(time(0));
+
 	Menu();
 	Stage();
 	
