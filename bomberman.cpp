@@ -27,6 +27,16 @@ void SetConsoleColor(int c)
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, c);
 }
+void ShowConsoleCursor(bool visible)
+{
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_CURSOR_INFO     cursorInfo;
+
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = visible; // set the cursor visibility
+    SetConsoleCursorInfo(out, &cursorInfo);
+}
 
 void Menu()
 {
@@ -438,6 +448,7 @@ void Input()
 int main()
 {
 	srand(time(0));
+	ShowConsoleCursor(false);
 
 	Menu();
 	Stage();
