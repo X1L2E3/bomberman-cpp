@@ -328,11 +328,12 @@ void BombExplosion(int bombRow, int bombCol)
 					grid[newRow][newCol] = '!';
 					gameOver = true;
 				}
-				else if (grid[newRow][newCol] == ' ' || grid[newRow][newCol] == '+')
+				else if (grid[newRow][newCol] == ' ' || grid[newRow][newCol] == '+'|| grid[newRow][newCol] == 'E')
 				{
+					Score(grid[newRow][newCol]);
 					grid[newRow][newCol] = 'X';
 				}
-				else if (grid[newRow][newCol] == 'O' || grid[newRow][newCol] == 'E')
+				else if (grid[newRow][newCol] == 'O')
 				{
 					Score(grid[newRow][newCol]);
 					grid[newRow][newCol] = 'X';
