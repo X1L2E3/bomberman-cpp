@@ -1,3 +1,8 @@
+/*
+Known issue:
+- Powerups don't disappear after player steps over them
+*/
+
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
@@ -140,6 +145,7 @@ void Stage()
 void Draw()
 {
 	SetCursorPosition(0, 0);
+	SetConsoleColor(5);
 
 	// For debugging
 	cout << "Player Row: " << playerRow << "\tPlayer Column: " << playerCol << endl;
@@ -149,14 +155,21 @@ void Draw()
 	{
 		for (int j = 0; j <= COLS-1; j++)
 		{
+			// Code (BG:FG)
+			// 119 (White:White)
+			// 165 (Dark Blue:Light green)
+			// 176 (Blue:Black)
+			// 193 (Red:Blue)
+			// 196 (Red:Red)
 			if (bombTime[i][j])
 			{
-				SetConsoleColor(4);
+				SetConsoleColor(197);
+				cout << 'o';
 			}
 			else if (playerRow == i && playerCol == j)
 			{
-				SetConsoleColor(5);
-				grid[i][j] = 'P';
+				SetConsoleColor(167);
+				cout << ' ';
 			}
 			else
 			{
@@ -164,22 +177,26 @@ void Draw()
 				{
 				case '-':
 				case '|':
-					SetConsoleColor(2);
+					SetConsoleColor(119);
+					cout << ' ';
 					break;
 				case 'X':
-					SetConsoleColor(4);
+					SetConsoleColor(197);
+					cout << ' ';
 					break;
 				case '#':
-					SetConsoleColor(7);
+					SetConsoleColor(119);
+					cout << ' ';
 					break;
 				case 'O':
-					SetConsoleColor(6);
+					SetConsoleColor(134);
+					cout << ' ';
 					break;
 				default:
-					SetConsoleColor(8);
+					SetConsoleColor(190);
+					cout << grid[i][j];
 				}
 			}
-			cout << grid[i][j];
 		}
 		cout << endl;
 	}
