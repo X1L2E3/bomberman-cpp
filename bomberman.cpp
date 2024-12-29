@@ -1,8 +1,3 @@
-/*
-Known issue:
-- Powerups don't disappear after player steps over them
-*/
-
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
@@ -141,6 +136,8 @@ void Stage()
 	StageObstacles(obstacleCount);
 	StagePowerups(powerupCount);
 	StageEnemies(enemyCount);
+
+	grid[playerRow][playerCol] = 'P';
 }
 void Draw()
 {
@@ -156,15 +153,18 @@ void Draw()
 		for (int j = 0; j <= COLS-1; j++)
 		{
 			// Code (BG:FG)
+			// 65 (Red: Red)
+			// 97 (Yellow: Yellow)
 			// 119 (White:White)
+			// 145 (Blue:Blue)
 			// 165 (Dark Blue:Light green)
 			// 176 (Blue:Black)
-			// 193 (Red:Blue)
-			// 196 (Red:Red)
+			// 193 (Light red:Blue)
+			// 196 (Light red:Red)
 			if (bombTime[i][j])
 			{
 				SetConsoleColor(197);
-				cout << 'o';
+				cout << ' ';
 			}
 			else if (playerRow == i && playerCol == j)
 			{
@@ -181,7 +181,7 @@ void Draw()
 					cout << ' ';
 					break;
 				case 'X':
-					SetConsoleColor(197);
+					SetConsoleColor(65);
 					cout << ' ';
 					break;
 				case '#':
@@ -192,6 +192,14 @@ void Draw()
 					SetConsoleColor(134);
 					cout << ' ';
 					break;
+				case 'E':
+					SetConsoleColor(85);
+					cout << ' ';
+					break;
+				case '+':
+					SetConsoleColor(97);
+					cout << ' ';
+					break;
 				default:
 					SetConsoleColor(190);
 					cout << grid[i][j];
@@ -200,6 +208,8 @@ void Draw()
 		}
 		cout << endl;
 	}
+
+	SetConsoleColor(190);
 }
 
 void EnemyMovement()
@@ -307,6 +317,7 @@ void PlayerMovement(char playerDir)
 		playerRow = newRow;
 		playerCol = newCol;
 	}
+	grid[playerRow][playerCol] = 'P';
 }
 void Score(char type)
 {
