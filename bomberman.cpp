@@ -2,14 +2,61 @@
 #include <conio.h>
 #include <windows.h>
 #include <thread>
+#include <fstream>
 using namespace std;
 
 bool gameOver = false;
 const int ROWS = 11, COLS = 41;
 char grid[ROWS][COLS];
-int playerRow = 1, playerCol = 1, playerScore = 0;
+int playerRow = 1, playerCol = 1, playerScore = 0, topScores[3] = { 0 };
 int enemyPos[4][COLS], bombCount = 3, bombLevel = 2, obstacleCount = 20, powerupCount = 5, enemyCount = 3;
 time_t stageTime = time(0), bombTime[ROWS][COLS], enemyTime = time(0);
+
+void SaveTopScores()
+{
+	ofstream file("top_scores.txt");
+	if (file.is_open())
+	{
+		for (int i = 0; i < 3; i++) {
+			file << topScores[i] << endl;
+		}
+		file.close();
+	}
+}
+void LoadTopScores()
+{
+	ifstream file("top_scores.txt");
+	if (file.is_open())
+	{
+		int i = 0;
+		while (file >> topScores[i] && i < 3) {
+			i++;
+		}
+		file.close();
+	}
+}
+void UpdateTopScores()
+{
+	for (int i = 0; i < 3; i++) {
+		if (playerScore > topScores[i])
+		{
+			for (int j = 2; j > i; j--) {
+				topScores[j] = topScores[j - 1];
+			}
+			topScores[i] = playerScore;
+			break;
+		}
+	}
+	SaveTopScores();
+}
+void DisplayTopScores()
+{
+	cout << "=== Top 3 Scores ===" << endl;
+	for (int i = 0; i < 3; i++) {
+		cout << i + 1 << ": " << topScores[i] << endl;
+	}
+	cout << "====================" << endl;
+}
 
 void SetCursorPosition(short int x, short int y)
 {
@@ -461,6 +508,7 @@ int main()
 	srand(time(0));
 	ShowConsoleCursor(false);
 
+	LoadTopScores();
 	Menu();
 	Stage();
 	
@@ -472,5 +520,9 @@ int main()
 		EnemyTimer();
 		BombTimer();
 	}
-	cout << "\nGame Over!" << endl;
+	UpdateTopScores();
+	SaveTopScores();
+	
+	cout << "\nGame Over!\n\n";
+	DisplayTopScores();
 }

@@ -1,7 +1,8 @@
 {
     "files.associations": {
         "ostream": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "fstream": "cpp"
     },
     "cSpell.words": [
         "kbhit"
