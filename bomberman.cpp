@@ -7,10 +7,13 @@ using namespace std;
 
 bool gameOver = false;
 const int ROWS = 11, COLS = 41;
+const DWORD enemyInterval = 1000, bombInterval = 3000;
 char grid[ROWS][COLS];
 int playerRow = 1, playerCol = 1, playerScore = 0, topScores[3] = { 0 };
-int enemyPos[4][COLS], bombCount = 3, bombLevel = 2, obstacleCount = 20, powerupCount = 5, enemyCount = 3;
-time_t stageTime = time(0), bombTime[ROWS][COLS], enemyTime = time(0);
+int enemyPos[4][COLS], bombCount = 1, bombLevel = 2, obstacleCount = 20, powerupCount = 5, enemyCount = 3;
+time_t lastTime;
+DWORD bombTime[ROWS][COLS], stageTime, enemyTime = GetTickCount();
+
 
 void SaveTopScores()
 {
@@ -147,7 +150,8 @@ void StagePowerups(int powerups)
 }
 void Stage()
 {
-	enemyTime = time(0);
+	enemyTime = stageTime = GetTickCount();
+	lastTime = time(0);
 
 	for (int r = 0; r <= ROWS-1; r++)
 	{
@@ -183,7 +187,7 @@ void Draw()
 	SetCursorPosition(0, 0);
 	SetConsoleColor(5);
 	
-	cout << "Score: " << playerScore << "\tTime: " << (time(0) - stageTime) << endl << endl;
+	cout << "Score: " << playerScore << "\tTime: " << (time(0) - lastTime) << endl << endl;
 
 	for (int i = 0; i <= ROWS-1; i++)
 	{
@@ -302,10 +306,10 @@ void EnemyMovement()
 }
 void EnemyTimer()
 {
-	if (time(0) - enemyTime >= 1)
+	if (GetTickCount() - enemyTime >= enemyInterval)
 	{
 		EnemyMovement();
-		enemyTime = time(0);
+		enemyTime = GetTickCount();
 	}
 }
 void PlayerInteraction(char object)
@@ -449,9 +453,9 @@ void BombTimer()
 	{
 		for (int c = 0; c <= COLS; c++)
 		{
-			if (bombTime[r][c] > 0)
+			if (bombTime[r][c] != 0)
 			{
-				if (time(0) - bombTime[r][c] >= 3)
+				if (GetTickCount() - bombTime[r][c] >= bombInterval)
 				{
 					thread bombThread(BombExplosion, r, c);
 					bombThread.detach();
@@ -489,7 +493,7 @@ void Input()
 		case ' ':
 			if (!bombTime[playerRow][playerCol] && bombCount)
 			{
-				bombTime[playerRow][playerCol] = time(0);
+				bombTime[playerRow][playerCol] = GetTickCount();
 				bombCount--;
 				grid[playerRow][playerCol] = 'B';
 			}
