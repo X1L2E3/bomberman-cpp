@@ -9,7 +9,7 @@ const int ROWS = 11, COLS = 41;
 char grid[ROWS][COLS];
 int playerRow = 1, playerCol = 1, playerScore = 0;
 int enemyPos[4][COLS], bombCount = 3, bombLevel = 2, obstacleCount = 20, powerupCount = 5, enemyCount = 3;
-time_t bombTime[ROWS][COLS], enemyTime = time(0);
+time_t stageTime = time(0), bombTime[ROWS][COLS], enemyTime = time(0);
 
 void SetCursorPosition(short int x, short int y)
 {
@@ -106,15 +106,7 @@ void Stage()
 	{
 		for (int c = 0; c <= COLS-1; c++)
 		{
-			if (r == 0 || r == ROWS-1)
-			{
-				grid[r][c] = '-';
-			}
-			else if (c == 0 || c == COLS-1)
-			{
-				grid[r][c] = '|';
-			}
-			else if (r % 2 == 0 && c % 2 == 0)
+			if (r == 0 || r == ROWS-1 || c == 0 || c == COLS-1 || (r % 2 == 0 && c % 2 == 0))
 			{
 				grid[r][c] = '#';
 			}
@@ -143,10 +135,8 @@ void Draw()
 {
 	SetCursorPosition(0, 0);
 	SetConsoleColor(5);
-
-	// For debugging
-	cout << "Player Row: " << playerRow << "\tPlayer Column: " << playerCol << endl;
-	cout << "Score: " << playerScore << "\tBombs: " << bombCount << endl;
+	
+	cout << "Score: " << playerScore << "\tTime: " << (time(0) - stageTime) << endl << endl;
 
 	for (int i = 0; i <= ROWS-1; i++)
 	{
@@ -175,21 +165,16 @@ void Draw()
 			{
 				switch (grid[i][j])
 				{
-				case '-':
-				case '|':
-					SetConsoleColor(119);
-					cout << ' ';
-					break;
 				case 'X':
-					SetConsoleColor(65);
+					SetConsoleColor(68);
 					cout << ' ';
 					break;
 				case '#':
-					SetConsoleColor(119);
+					SetConsoleColor(136);
 					cout << ' ';
 					break;
 				case 'O':
-					SetConsoleColor(134);
+					SetConsoleColor(273);
 					cout << ' ';
 					break;
 				case 'E':
@@ -197,11 +182,11 @@ void Draw()
 					cout << ' ';
 					break;
 				case '+':
-					SetConsoleColor(97);
-					cout << ' ';
+					SetConsoleColor(270);
+					cout << '+';
 					break;
 				default:
-					SetConsoleColor(190);
+					SetConsoleColor(0);
 					cout << grid[i][j];
 				}
 			}
@@ -209,7 +194,7 @@ void Draw()
 		cout << endl;
 	}
 
-	SetConsoleColor(190);
+	SetConsoleColor(12);
 }
 
 void EnemyMovement()
