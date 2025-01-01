@@ -48,7 +48,7 @@ Note: Can use different symbols for players etc  for  better visualization.
 ### Sound
    - Add sound effects for bomb planting and detonating.
 ### Stages
-   - Create atleast 2 stages
+   - Create at least 2 stages
 
 ## Scoring
 - Destroying enemies: 50 points per enemy
