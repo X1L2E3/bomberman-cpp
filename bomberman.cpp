@@ -5,11 +5,11 @@
 #include <fstream>
 using namespace std;
 
-bool gameOver = false, stageOver = false, exitGame = false, menu = true;
+bool gameOver = false, stageOver = false, exitGame = false, menu = true, gamePlayed = true;
 const int ROWS = 11, COLS = 41;
 const DWORD enemyInterval = 1000, bombInterval = 3000;
 char grid[ROWS][COLS];
-int playerRow = 1, playerCol = 1, playerScore = 0, topScores[10] = { 0 };
+int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, topScores[10] = { 0 };
 int enemyPos[4][COLS], bombCount = 1, bombLevel = 2, obstacleCount = 20, powerupCount = 5, enemyCount = 3;
 time_t lastTime;
 DWORD bombTime[ROWS][COLS], stageTime, enemyTime = GetTickCount();
@@ -58,6 +58,8 @@ void DisplayTopScores()
 		cout << i + 1 << ": " << topScores[i] << endl;
 	}
 	cout << "====================" << endl;
+	system("pause");
+	system("cls");
 }
 
 void SetCursorPosition(short int x, short int y)
@@ -157,6 +159,8 @@ void Menu()
 			{
 			case 1:
 				gameOver = false;
+				stageOver = false;
+				exitGame = false;
 				menu = false;
 				break;
 			case 2:
@@ -172,6 +176,7 @@ void Menu()
 				gameOver = true;
 				exitGame = true;
 				menu = false;
+				gamePlayed = false;
 				break;
 			}
 			system("cls");
@@ -179,6 +184,8 @@ void Menu()
 		case 27:
 			gameOver = true;
 			exitGame = true;
+			menu = false;
+			gamePlayed = false;
 			break;
 		}
 	}
@@ -244,6 +251,7 @@ void Stage()
 {
 	enemyTime = stageTime = GetTickCount();
 	lastTime = time(0);
+	playerRow = playerCol = 1;
 
 	for (int r = 0; r <= ROWS-1; r++)
 	{
@@ -274,12 +282,28 @@ void Stage()
 
 	grid[playerRow][playerCol] = 'P';
 }
+void StageOver()
+{
+	stageOver = true;
+	if (playerLives == 0)
+	{
+		gameOver = true;
+		gamePlayed = true;
+		menu = true;
+	}
+	else
+	{
+		playerLives--;
+		Sleep(1000);
+		stageOver = false;
+	}
+}
 void Draw()
 {
 	SetCursorPosition(0, 0);
 	SetConsoleColor(5);
 	
-	cout << "Score: " << playerScore << "\tTime: " << (time(0) - lastTime) << endl << endl;
+	cout << "Score: " << playerScore << "\tTime: " << (time(0) - lastTime) << "\tLives: " << playerLives << endl << endl;
 
 	for (int i = 0; i <= ROWS-1; i++)
 	{
@@ -364,7 +388,7 @@ void EnemyMovement()
 
 			if (newR == playerRow && newC == playerCol)
 			{
-				gameOver = true;
+				StageOver();
 			}
 			else if (grid[newR][newC] == 'X')
 			{
@@ -412,7 +436,7 @@ void PlayerInteraction(char object)
 		break;
 	case 'X':
 	case 'E':
-		gameOver = true;
+		stageOver = true;
 	}
 }
 void PlayerMovement(char playerDir)
@@ -462,7 +486,7 @@ void BombExplosion(int bombRow, int bombCol)
 	bombCount++;
 
 	bool forced = false;
-	if (grid[bombRow][bombCol] == 'P') gameOver = true;
+	if (grid[bombRow][bombCol] == 'P') stageOver = true;
 	grid[bombRow][bombCol] = 'X';
 	for (int dir = 0; dir < 4; dir++)
 	{
@@ -480,7 +504,7 @@ void BombExplosion(int bombRow, int bombCol)
 				if (newRow == playerRow && newCol == playerCol)
 				{
 					grid[newRow][newCol] = '!';
-					gameOver = true;
+					StageOver();
 				}
 				else if (grid[newRow][newCol] == ' ' || grid[newRow][newCol] == '+'|| grid[newRow][newCol] == 'E')
 				{
@@ -590,7 +614,10 @@ void Input()
 			break;
 		case 27:
 		case 8:
+			stageOver = true;
 			gameOver = true;
+			menu = true;
+			gamePlayed = false;
 			break;
 		}
 		if (playerDir != 'n') PlayerMovement(playerDir);
@@ -620,8 +647,11 @@ void Game()
 		}
 		SaveTopScores();
 		
-		cout << "\nGame Over!\n\n";
-		DisplayTopScores();
+		if (gamePlayed)
+		{
+			cout << "\nGame Over!\n\n";
+			DisplayTopScores();
+		}
 	}
 }
 
