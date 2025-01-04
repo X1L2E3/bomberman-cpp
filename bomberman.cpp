@@ -9,18 +9,17 @@ bool gameOver = false;
 const int ROWS = 11, COLS = 41;
 const DWORD enemyInterval = 1000, bombInterval = 3000;
 char grid[ROWS][COLS];
-int playerRow = 1, playerCol = 1, playerScore = 0, topScores[3] = { 0 };
+int playerRow = 1, playerCol = 1, playerScore = 0, topScores[10] = { 0 };
 int enemyPos[4][COLS], bombCount = 1, bombLevel = 2, obstacleCount = 20, powerupCount = 5, enemyCount = 3;
 time_t lastTime;
 DWORD bombTime[ROWS][COLS], stageTime, enemyTime = GetTickCount();
-
 
 void SaveTopScores()
 {
 	ofstream file("top_scores.txt");
 	if (file.is_open())
 	{
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 10; i++) {
 			file << topScores[i] << endl;
 		}
 		file.close();
@@ -32,7 +31,7 @@ void LoadTopScores()
 	if (file.is_open())
 	{
 		int i = 0;
-		while (file >> topScores[i] && i < 3) {
+		while (file >> topScores[i] && i < 10) {
 			i++;
 		}
 		file.close();
@@ -40,7 +39,7 @@ void LoadTopScores()
 }
 void UpdateTopScores()
 {
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 10; i++) {
 		if (playerScore > topScores[i])
 		{
 			for (int j = 2; j > i; j--) {
@@ -54,8 +53,8 @@ void UpdateTopScores()
 }
 void DisplayTopScores()
 {
-	cout << "=== Top 3 Scores ===" << endl;
-	for (int i = 0; i < 3; i++) {
+	cout << "=== Top 10 Scores ===" << endl;
+	for (int i = 0; i < 10; i++) {
 		cout << i + 1 << ": " << topScores[i] << endl;
 	}
 	cout << "====================" << endl;
@@ -193,16 +192,14 @@ void Draw()
 	{
 		for (int j = 0; j <= COLS-1; j++)
 		{
-			// Code (BG:FG)
-			// 65 (Red: Red)
-			// 97 (Yellow: Yellow)
-			// 119 (White:White)
-			// 145 (Blue:Blue)
-			// 165 (Dark Blue:Light green)
-			// 176 (Blue:Black)
-			// 193 (Light red:Blue)
-			// 196 (Light red:Red)
-			if (bombTime[i][j])
+			if ((GetTickCount() - bombTime[i][j] >= 500 && GetTickCount() - bombTime[i][j] < 1000) ||
+				(GetTickCount() - bombTime[i][j] >= 1500 && GetTickCount() - bombTime[i][j] < 2000) ||
+				(GetTickCount() - bombTime[i][j] >= 2500 && GetTickCount() - bombTime[i][j] < 3000))
+			{
+				SetConsoleColor(127);
+				cout << ' ';
+			}
+			else if (bombTime[i][j])
 			{
 				SetConsoleColor(197);
 				cout << ' ';
