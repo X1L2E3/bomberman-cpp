@@ -5,7 +5,7 @@
 #include <fstream>
 using namespace std;
 
-bool gameOver = false;
+bool gameOver = false, stageOver = false, exitGame = false, menu = true;
 const int ROWS = 11, COLS = 41;
 const DWORD enemyInterval = 1000, bombInterval = 3000;
 char grid[ROWS][COLS];
@@ -84,11 +84,104 @@ void ShowConsoleCursor(bool visible)
 
 void Menu()
 {
-	cout << "\n\tBomber man" << endl;
-	cout << "\tPress b to place bomb, w, a, s, d to move" << endl;
-	cout << "\tPress x to quit" << endl;
-	cout << "\n\t[ANY KEY] Play game" << endl;
-	_getch();
+	int selection = 1, a, b, c, d;
+
+	while (menu)
+	{
+		system("cls");
+		SetConsoleColor(192);
+		cout << "\t======================\n";
+		cout << "\t=  BOMBER-MAN CLONE  =\n";
+		cout << "\t======================\n\n";
+		if (selection == 1)
+		{
+			a = 240;
+			b = c = d = 7;
+		}
+		else if (selection == 2)
+		{
+			a = c = d = 7;
+			b = 240;
+		}
+		else if (selection == 3)
+		{
+			a = b = d = 7;
+			c = 240;
+		}
+		else if (selection == 4)
+		{
+			a = b = c = 7;
+			d = 240;
+		}
+
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), a);
+		cout << "\t Play ";
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), b);
+		cout << "\t\t Help ";
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), c);
+		cout << "\n\t Scores ";
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), d);
+		cout << "\t Exit ";
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 2);
+
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 8);
+		cout << "\n\n\t[Arrow keys]\tMove\n\t[Enter]\t\tSelect\n\t[Esc]\t\tQuit\n";
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 5);
+
+		char key = _getch();
+		switch (key)
+		{
+		case 'a':
+		case 75:
+			if (selection > 1)
+				selection--;
+			break;
+		case 'd':
+		case 77:
+			if (selection < 4)
+				selection++;
+			break;
+		case 'w':
+		case 72:
+			if (selection > 2)
+				selection -= 2;
+			break;
+		case 's':
+		case 80:
+			if (selection < 3)
+				selection += 2;
+			break;
+		case 'e':
+		case 13:
+			switch (selection)
+			{
+			case 1:
+				gameOver = false;
+				menu = false;
+				break;
+			case 2:
+				//Help();
+				system("pause");
+				break;
+			case 3:
+				system("cls");
+				DisplayTopScores();
+				system("pause");
+				break;
+			case 4:
+				gameOver = true;
+				exitGame = true;
+				menu = false;
+				break;
+			}
+			system("cls");
+			break;
+		case 27:
+			gameOver = true;
+			exitGame = true;
+			break;
+		}
+	}
 	system("cls");
 }
 void StageObstacles(int obstacles)
@@ -504,26 +597,38 @@ void Input()
 	}
 }
 
+void Game()
+{
+	while (!exitGame)
+	{
+		LoadTopScores();
+
+		Menu();
+
+		while (!gameOver)
+		{
+			Stage();
+			while (!stageOver)
+			{
+				Draw();
+				Input();
+
+				EnemyTimer();
+				BombTimer();
+			}
+			UpdateTopScores();
+		}
+		SaveTopScores();
+		
+		cout << "\nGame Over!\n\n";
+		DisplayTopScores();
+	}
+}
+
 int main()
 {
-	srand(time(0));
 	ShowConsoleCursor(false);
-
-	LoadTopScores();
-	Menu();
-	Stage();
-	
-	while (!gameOver)
-	{
-		Draw();
-		Input();
-
-		EnemyTimer();
-		BombTimer();
-	}
-	UpdateTopScores();
-	SaveTopScores();
-	
-	cout << "\nGame Over!\n\n";
-	DisplayTopScores();
+	srand(time(0));
+	Game();
+	return 0;
 }
