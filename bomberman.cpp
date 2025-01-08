@@ -12,7 +12,7 @@ char grid[ROWS][COLS];
 int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, topScores[10] = { 0 };
 int enemyPos[4][COLS], bombCount = 1, bombLevel = 2, obstacleCount = 20, powerupCount = 5, enemyCount = 3;
 time_t lastTime;
-DWORD bombTime[ROWS][COLS], stageTime, enemyTime = GetTickCount();
+DWORD bombTime[ROWS][COLS], stageTime, moveTime, enemyTime = GetTickCount();
 
 void SaveTopScores()
 {
@@ -303,7 +303,7 @@ void Draw()
 	SetCursorPosition(0, 0);
 	SetConsoleColor(5);
 	
-	cout << "Score: " << playerScore << "\tTime: " << (time(0) - lastTime) << "\tLives: " << playerLives << endl << endl;
+	cout << "Score: " << playerScore << "\tLives: " << playerLives << "\tTime: " << (time(0) - lastTime) << endl << endl;
 
 	for (int i = 0; i <= ROWS-1; i++)
 	{
@@ -441,6 +441,8 @@ void PlayerInteraction(char object)
 }
 void PlayerMovement(char playerDir)
 {
+	if (GetTickCount() - moveTime < 250) return;
+	moveTime = GetTickCount();
 	int newRow = playerRow;
 	int newCol = playerCol;
 
@@ -585,7 +587,9 @@ void Input()
 
 	if (_kbhit())
 	{
-		switch (_getch())
+		char key = _getch();
+		
+		switch (key)
 		{
 		case 'w':
 		case 72:
@@ -620,7 +624,10 @@ void Input()
 			gamePlayed = false;
 			break;
 		}
-		if (playerDir != 'n') PlayerMovement(playerDir);
+		if (playerDir != 'n')
+		{
+			PlayerMovement(playerDir);
+		}
 	}
 }
 
