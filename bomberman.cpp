@@ -5,12 +5,13 @@
 #include <fstream>
 using namespace std;
 
-bool gameOver = false, stageOver = false, exitGame = false, menu = true, gamePlayed = true;
+bool gameOver = false, stageOver = false, stageWin = false, exitGame = false, menu = true, gamePlayed = true;
 const int ROWS = 11, COLS = 41;
 const DWORD enemyInterval = 1000, bombInterval = 3000;
 char grid[ROWS][COLS];
-int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, topScores[10] = { 0 };
-int enemyPos[4][COLS], bombCount = 1, bombLevel = 2, obstacleCount = 20, powerupCount = 5, enemyCount = 3;
+int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombLevel = 2;
+int levelCount = 1, enemyPos[4][COLS], obstacleCount = 20, powerupCount = 5, enemyCount = 3;
+int topScores[10] = { 0 };
 time_t lastTime;
 DWORD bombTime[ROWS][COLS], stageTime, moveTime, enemyTime = GetTickCount();
 
@@ -117,13 +118,13 @@ void Menu()
 		}
 
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), a);
-		cout << "\t Play ";
+		cout << "\tPlay";
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), b);
-		cout << "\t\t Help ";
+		cout << "\t\tHelp";
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), c);
-		cout << "\n\t Scores ";
+		cout << "\n\tScores";
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), d);
-		cout << "\t Exit ";
+		cout << "\t\tExit";
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 2);
 
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 8);
@@ -170,7 +171,6 @@ void Menu()
 			case 3:
 				system("cls");
 				DisplayTopScores();
-				system("pause");
 				break;
 			case 4:
 				gameOver = true;
@@ -247,11 +247,39 @@ void StagePowerups(int powerups)
 		}
 	}
 }
+void StageLevel(int level)
+{
+	switch (level)
+	{
+		case 1:
+		obstacleCount = 25, powerupCount = 0, enemyCount = 1;
+		break;
+		case 2:
+		obstacleCount = 25, powerupCount = 0, enemyCount = 2;
+		break;
+		case 3:
+		obstacleCount = 35, powerupCount = 1, enemyCount = 3;
+		break;
+		case 4:
+		obstacleCount = 45, powerupCount = 2, enemyCount = 5;
+		break;
+		case 5:
+		obstacleCount = 50, powerupCount = 2, enemyCount = 7;
+		break;
+	}
+}
 void Stage()
 {
+	system("cls");
+	DWORD timeout = GetTickCount();
+
+	cout << "\n\n\t\tSTAGE " << levelCount;
+	while (GetTickCount() - timeout < 1500)
+
 	enemyTime = stageTime = GetTickCount();
 	lastTime = time(0);
 	playerRow = playerCol = 1;
+	stageOver = false;
 
 	for (int r = 0; r <= ROWS-1; r++)
 	{
@@ -276,11 +304,14 @@ void Stage()
 		}
 	}
 
+	StageLevel(levelCount);
 	StageObstacles(obstacleCount);
 	StagePowerups(powerupCount);
 	StageEnemies(enemyCount);
 
 	grid[playerRow][playerCol] = 'P';
+
+	system("cls");
 }
 void StageOver()
 {
@@ -431,12 +462,13 @@ void PlayerInteraction(char object)
 	switch (object)
 	{
 	case '+':
-		bombCount++;
+		playerBombs++;
 		playerScore += 20;
 		break;
 	case 'X':
 	case 'E':
 		stageOver = true;
+		stageWin = false;
 	}
 }
 void PlayerMovement(char playerDir)
@@ -477,22 +509,28 @@ void Score(char type)
 	{
 	case 'O':
 		playerScore += 10;
+		obstacleCount--;
 		break;
 	case 'E':
 		playerScore += 50;
+		enemyCount--;
+		if (enemyCount == 0)
+		{
+			stageWin = true;
+			stageOver = true;
+		}
 	}
-
 }
 void BombExplosion(int bombRow, int bombCol)
 {
-	bombCount++;
+	playerBombs++;
 
 	bool forced = false;
 	if (grid[bombRow][bombCol] == 'P') stageOver = true;
 	grid[bombRow][bombCol] = 'X';
 	for (int dir = 0; dir < 4; dir++)
 	{
-		for (int r = 1; r <= bombLevel; r++)
+		for (int r = 1; r <= playerBombLevel; r++)
 		{
 			int newRow = bombRow, newCol = bombCol;
 
@@ -544,7 +582,7 @@ void BombExplosion(int bombRow, int bombCol)
 
 	for (int dir = 0; dir < 4; dir++)
 	{
-		for (int r = 1; r <= bombLevel; r++)
+		for (int r = 1; r <= playerBombLevel; r++)
 		{
 			int newRow = bombRow, newCol = bombCol;
 
@@ -588,7 +626,7 @@ void Input()
 	if (_kbhit())
 	{
 		char key = _getch();
-		
+
 		switch (key)
 		{
 		case 'w':
@@ -609,10 +647,10 @@ void Input()
 			break;
 		case 'b':
 		case ' ':
-			if (!bombTime[playerRow][playerCol] && bombCount)
+			if (!bombTime[playerRow][playerCol] && playerBombs)
 			{
 				bombTime[playerRow][playerCol] = GetTickCount();
-				bombCount--;
+				playerBombs--;
 				grid[playerRow][playerCol] = 'B';
 			}
 			break;
@@ -649,6 +687,23 @@ void Game()
 
 				EnemyTimer();
 				BombTimer();
+			}
+			if (stageWin)
+			{
+				DWORD timeout = GetTickCount();
+				cout << "\n\n\tYou win!\n";
+				while (GetTickCount() - timeout < 1000);
+
+				if (levelCount < 5)
+					levelCount++;
+				else
+					gameOver = true;
+			}
+			else if (gamePlayed == true)
+			{
+				DWORD timeout = GetTickCount();
+				cout << "\n\n\tYou lose...\n";
+				while (GetTickCount() - timeout < 2000);
 			}
 			UpdateTopScores();
 		}
