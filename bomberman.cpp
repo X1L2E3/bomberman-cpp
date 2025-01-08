@@ -419,7 +419,9 @@ void EnemyMovement()
 
 			if (newR == playerRow && newC == playerCol)
 			{
-				StageOver();
+				stageOver = true;
+				stageWin = false;
+				playerLives--;
 			}
 			else if (grid[newR][newC] == 'X')
 			{
@@ -701,9 +703,19 @@ void Game()
 			}
 			else if (gamePlayed == true)
 			{
-				DWORD timeout = GetTickCount();
-				cout << "\n\n\tYou lose...\n";
-				while (GetTickCount() - timeout < 2000);
+				if (playerLives > 0)
+				{
+					DWORD timeout = GetTickCount();
+					cout << "\n\n\tYou died...\n";
+					while (GetTickCount() - timeout < 2000);
+				}
+				else
+				{
+					DWORD timeout = GetTickCount();
+					cout << "\n\n\tYou have lost all your lives!\n";
+					while (GetTickCount() - timeout < 2000);
+					gameOver = true;
+				}
 			}
 			UpdateTopScores();
 		}
