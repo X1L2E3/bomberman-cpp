@@ -20,8 +20,9 @@ DWORD bombTime[ROWS][COLS], stageTime, moveTime, enemyTime = GetTickCount();
 void SaveTopScores(); void LoadTopScores(); void UpdateTopScores(); void DisplayTopScores();
 void SetCursorPosition(short int x, short int y); void SetConsoleColor(int c); void ShowConsoleCursor(bool visible);
 void Menu(); void Draw(); void Input(); void Game(); void PlayerScore(char type);
-void StageSetObstacles(int obstacles); void StageSetEnemies(int enemies); void StagePlay();
-void StageSetPowerups(int powerups); void StageSetLevel(int level); void StageSetup(); 
+void StageSetObstacles(int obstacles); void StageSetEnemies(int enemies);
+void StageSetPowerups(int powerups); void StageSetLevel(int level);
+void StageSetup(); void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs);
 void EnemyMovement(); void EnemyTimer();
 void PlayerInteraction(char object); void PlayerMovement(char playerDir);
 void BombExplosion(int bombRow, int bombCol); void BombTimer();
@@ -186,7 +187,6 @@ void StageSetup()
 	Timeout();
 
 	enemyTime = stageTime = GetTickCount();
-	lastTime = time(0);
 	playerRow = playerCol = 1;
 	stageOver = false;
 
@@ -221,9 +221,9 @@ void StageSetup()
 	grid[playerRow][playerCol] = 'P';
 
 	system("cls");
-	StagePlay();
+	StagePlay(levelCount, obstacleCount, powerupCount, enemyCount, playerBombs);
 }
-void StagePlay()
+void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs)
 {
 	while (!stageOver)
 	{
@@ -233,6 +233,36 @@ void StagePlay()
 		EnemyTimer();
 		BombTimer();
 	}
+
+	if (stageWin)
+	{
+		cout << "\n\n\tYou win!\n";
+		Timeout(10);
+
+		if (level < 5)
+			level++;
+		else
+			gameOver = true;
+	}
+	else if (gamePlayed == true)
+	{
+		if (playerLives > 0)
+		{
+			cout << "\n\n\tYou died...\n";
+			Timeout(20);
+		}
+		else
+		{
+			cout << "\n\n\tYou have lost all your lives!\n";
+			Timeout(20);
+			gameOver = true;
+		}
+	}
+
+	obstacleCount = obstacles;
+	enemyCount = enemies;
+	powerupCount = powerups;
+	playerBombs = bombs;
 }
 
 void EnemyMovement()
@@ -524,7 +554,7 @@ void Draw()
 	SetConsoleColor(5);
 	
 	cout << "DEBUG: Bombs " << playerBombs << "\n";
-	cout << "Score: " << playerScore << "\tLives: " << playerLives << "\tTime: " << (time(0) - lastTime) << endl << endl;
+	cout << "Score: " << playerScore << "\tLives: " << playerLives << endl << endl;
 
 	for (int i = 0; i <= ROWS-1; i++)
 	{
@@ -701,33 +731,6 @@ void Game()
 		while (!gameOver)
 		{
 			StageSetup();
-			if (stageWin)
-			{
-				DWORD timeout = GetTickCount();
-				cout << "\n\n\tYou win!\n";
-				while (GetTickCount() - timeout < 1000);
-
-				if (levelCount < 5)
-					levelCount++;
-				else
-					gameOver = true;
-			}
-			else if (gamePlayed == true)
-			{
-				if (playerLives > 0)
-				{
-					DWORD timeout = GetTickCount();
-					cout << "\n\n\tYou died...\n";
-					while (GetTickCount() - timeout < 2000);
-				}
-				else
-				{
-					DWORD timeout = GetTickCount();
-					cout << "\n\n\tYou have lost all your lives!\n";
-					while (GetTickCount() - timeout < 2000);
-					gameOver = true;
-				}
-			}
 			UpdateTopScores();
 		}
 		SaveTopScores();
