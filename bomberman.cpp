@@ -4,14 +4,13 @@
 #include <thread>
 #include <fstream>
 #include "colors.h"
-#include "funcs.h"
 using namespace std;
 
 bool gameOver = false, stageOver = false, stageWin = false, exitGame = false, menu = true, gamePlayed = true;
 const int ROWS = 11, COLS = 41;
 const DWORD enemyInterval = 1000, bombInterval = 3000;
 char grid[ROWS][COLS];
-int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombLevel = 2;
+int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombsPlaced = 0, playerBombLevel = 2;
 int levelCount = 1, enemyPos[4][COLS], obstacleCount = 20, powerupCount = 5, enemyCount = 3;
 int topScores[10] = { 0 };
 time_t lastTime;
@@ -22,10 +21,11 @@ void SetCursorPosition(short int x, short int y); void SetConsoleColor(int c); v
 void Menu(); void Draw(); void Input(); void Game(); void PlayerScore(char type);
 void StageSetObstacles(int obstacles); void StageSetEnemies(int enemies);
 void StageSetPowerups(int powerups); void StageSetLevel(int level);
-void StageSetup(); void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs);
+void StageSetup(); void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs, int score);
 void EnemyMovement(); void EnemyTimer();
 void PlayerInteraction(char object); void PlayerMovement(char playerDir);
 void BombExplosion(int bombRow, int bombCol); void BombTimer();
+void Timeout(DWORD t = 15);
 
 int main()
 {
@@ -147,7 +147,7 @@ void StageSetPowerups(int powerups)
 	{
 		int r = 1 + rand() % ROWS-2, c = 1 + rand() % COLS-2;
 		if (grid[r][c] == ' ' &&
-			grid[r+1][c] != '+' &&grid[r-1][c] != '+' &&
+			grid[r+1][c] != '+' && grid[r-1][c] != '+' &&
 			grid[r][c+1] != '+' && grid[r][c-1] != '+' &&
 			r != playerRow + 1 && c != playerCol && 
 			r != playerRow + 2 && c != playerCol &&
@@ -189,6 +189,7 @@ void StageSetup()
 	enemyTime = stageTime = GetTickCount();
 	playerRow = playerCol = 1;
 	stageOver = false;
+	playerBombsPlaced = 0;
 
 	for (int r = 0; r <= ROWS-1; r++)
 	{
@@ -221,9 +222,9 @@ void StageSetup()
 	grid[playerRow][playerCol] = 'P';
 
 	system("cls");
-	StagePlay(levelCount, obstacleCount, powerupCount, enemyCount, playerBombs);
+	StagePlay(levelCount, obstacleCount, powerupCount, enemyCount, playerBombs, playerScore);
 }
-void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs)
+void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs, int score)
 {
 	while (!stageOver)
 	{
@@ -250,6 +251,7 @@ void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs)
 		{
 			cout << "\n\n\tYou died...\n";
 			Timeout(20);
+			playerScore = score;
 		}
 		else
 		{
@@ -262,6 +264,7 @@ void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs)
 	obstacleCount = obstacles;
 	enemyCount = enemies;
 	powerupCount = powerups;
+	levelCount = level;
 	playerBombs = bombs;
 }
 
@@ -334,7 +337,7 @@ void EnemyTimer()
 
 void BombExplosion(int bombRow, int bombCol)
 {
-	playerBombs++;
+	playerBombsPlaced--;
 
 	bool forced = false;
 	if (grid[bombRow][bombCol] == 'P') stageOver = true;
@@ -439,7 +442,7 @@ void PlayerInteraction(char object)
 	{
 	case '+':
 		playerBombs++;
-		playerScore += 20;
+		playerScore += 5;
 		break;
 	case 'X':
 	case 'E':
@@ -452,6 +455,7 @@ void PlayerMovement(char playerDir)
 {
 	if (GetTickCount() - moveTime < 250) return;
 	moveTime = GetTickCount();
+
 	int newRow = playerRow;
 	int newCol = playerCol;
 
@@ -527,10 +531,10 @@ void Input()
 			break;
 		case 'b':
 		case ' ':
-			if (!bombTime[playerRow][playerCol] && playerBombs)
+			if (!bombTime[playerRow][playerCol] && (playerBombsPlaced < playerBombs))
 			{
 				bombTime[playerRow][playerCol] = GetTickCount();
-				playerBombs--;
+				playerBombsPlaced++;
 				grid[playerRow][playerCol] = 'B';
 			}
 			break;
@@ -553,7 +557,7 @@ void Draw()
 	SetCursorPosition(0, 0);
 	SetConsoleColor(5);
 	
-	cout << "DEBUG: Bombs " << playerBombs << "\n";
+	cout << "DEBUG: Bombs " << playerBombs << "\tPlaced: " << playerBombsPlaced << "\n";
 	cout << "Score: " << playerScore << "\tLives: " << playerLives << endl << endl;
 
 	for (int i = 0; i <= ROWS-1; i++)
@@ -741,4 +745,11 @@ void Game()
 			DisplayTopScores();
 		}
 	}
+}
+
+void Timeout(DWORD t)
+{
+    DWORD timeout = GetTickCount();
+	while (GetTickCount() - timeout < (t*100));
+    return;
 }
