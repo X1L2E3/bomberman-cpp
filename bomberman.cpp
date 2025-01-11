@@ -267,6 +267,13 @@ void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs, i
 	levelCount = level;
 	playerBombs = bombs;
 }
+void StageOver()
+{
+	
+	stageOver = true;
+	stageWin = false;
+	if (playerLives > 0) playerLives--;
+}
 
 void EnemyMovement()
 {
@@ -294,9 +301,7 @@ void EnemyMovement()
 
 			if (newR == playerRow && newC == playerCol)
 			{
-				stageOver = true;
-				stageWin = false;
-				if (playerLives > 0) playerLives--;
+				StageOver();
 			}
 			else if (grid[newR][newC] == 'X')
 			{
@@ -337,81 +342,81 @@ void EnemyTimer()
 
 void BombExplosion(int bombRow, int bombCol)
 {
-	playerBombsPlaced--;
-
-	bool forced = false;
-	if (grid[bombRow][bombCol] == 'P') stageOver = true;
-	grid[bombRow][bombCol] = 'X';
-	for (int dir = 0; dir < 4; dir++)
+	if (grid[bombRow][bombCol] == 'B' || grid[bombRow][bombCol] == 'P')
 	{
-		for (int r = 1; r <= playerBombLevel; r++)
+		playerBombsPlaced--;
+		bool forced = false;
+		
+		if (grid[bombRow][bombCol] == 'P') StageOver();
+		grid[bombRow][bombCol] = 'X';
+		for (int dir = 0; dir < 4; dir++)
 		{
-			int newRow = bombRow, newCol = bombCol;
-
-			if (dir == 0) newRow = bombRow - r;
-			else if (dir == 1) newRow = bombRow + r;
-			else if (dir == 2) newCol = bombCol - r;
-			else if (dir == 3) newCol = bombCol + r;
-
-			if (newRow > 0 && newRow < ROWS && newCol > 0 && newCol < COLS)
+			for (int r = 1; r <= playerBombLevel; r++)
 			{
-				if (newRow == playerRow && newCol == playerCol)
+				int newRow = bombRow, newCol = bombCol;
+
+				if (dir == 0) newRow = bombRow - r;
+				else if (dir == 1) newRow = bombRow + r;
+				else if (dir == 2) newCol = bombCol - r;
+				else if (dir == 3) newCol = bombCol + r;
+
+				if (newRow > 0 && newRow < ROWS && newCol > 0 && newCol < COLS)
 				{
-					grid[newRow][newCol] = '!';
-					stageOver = true;
-					stageWin = false;
-					if (playerLives > 0) playerLives--;
-				}
-				else if (grid[newRow][newCol] == ' ' || grid[newRow][newCol] == '+'|| grid[newRow][newCol] == 'E')
-				{
-					PlayerScore(grid[newRow][newCol]);
-					grid[newRow][newCol] = 'X';
-				}
-				else if (grid[newRow][newCol] == 'O')
-				{
-					PlayerScore(grid[newRow][newCol]);
-					grid[newRow][newCol] = 'X';
-					break;
-				}
-				else if (grid[newRow][newCol] == '#')
-				{
-					break;
-				}
-				else if (grid[newRow][newCol] == 'B')
-				{
-					if (bombTime[newRow][newCol] > 0)
+					if (newRow == playerRow && newCol == playerCol)
 					{
-						forced = true;
-						BombExplosion(newRow, newCol);
-						bombTime[newRow][newCol] = 0;
+						grid[newRow][newCol] = '!';
+						StageOver();
+					}
+					else if (grid[newRow][newCol] == ' ' || grid[newRow][newCol] == '+'|| grid[newRow][newCol] == 'E')
+					{
+						PlayerScore(grid[newRow][newCol]);
 						grid[newRow][newCol] = 'X';
+					}
+					else if (grid[newRow][newCol] == 'O')
+					{
+						PlayerScore(grid[newRow][newCol]);
+						grid[newRow][newCol] = 'X';
+						break;
+					}
+					else if (grid[newRow][newCol] == '#')
+					{
+						break;
+					}
+					else if (grid[newRow][newCol] == 'B')
+					{
+						if (bombTime[newRow][newCol] > 0)
+						{
+							forced = true;
+							BombExplosion(newRow, newCol);
+							bombTime[newRow][newCol] = 0;
+						}
 					}
 				}
 			}
 		}
-	}
 
-	if (!forced)
-		this_thread::sleep_for(chrono::seconds(1));
+		if (!forced)
+			this_thread::sleep_for(chrono::seconds(1));
 
-	if (grid[bombRow][bombCol] == 'X' || grid[bombRow][bombCol] == '!') grid[bombRow][bombCol] = ' ';
+		if (grid[bombRow][bombCol] == 'X' || grid[bombRow][bombCol] == '!') grid[bombRow][bombCol] = ' ';
 
-	for (int dir = 0; dir < 4; dir++)
-	{
-		for (int r = 1; r <= playerBombLevel; r++)
+		for (int dir = 0; dir < 4; dir++)
 		{
-			int newRow = bombRow, newCol = bombCol;
-
-			if (dir == 0) newRow = bombRow - r;
-			else if (dir == 1) newRow = bombRow + r;
-			else if (dir == 2) newCol = bombCol - r;
-			else if (dir == 3) newCol = bombCol + r;
-
-			if (newRow > 0 && newRow < ROWS && newCol > 0 && newCol < COLS)
+			for (int r = 1; r <= playerBombLevel; r++)
 			{
-				if (grid[newRow][newCol] == 'X' || grid[newRow][newCol] == '!')
+				int newRow = bombRow, newCol = bombCol;
+
+				if (dir == 0) newRow = bombRow - r;
+				else if (dir == 1) newRow = bombRow + r;
+				else if (dir == 2) newCol = bombCol - r;
+				else if (dir == 3) newCol = bombCol + r;
+
+				if (newRow > 0 && newRow < ROWS && newCol > 0 && newCol < COLS)
 				{
-					grid[newRow][newCol] = ' ';
+					if (grid[newRow][newCol] == 'X' || grid[newRow][newCol] == '!')
+					{
+						grid[newRow][newCol] = ' ';
+					}
 				}
 			}
 		}
@@ -446,9 +451,7 @@ void PlayerInteraction(char object)
 		break;
 	case 'X':
 	case 'E':
-		stageOver = true;
-		stageWin = false;
-		if (playerLives > 0) playerLives--;
+		StageOver();
 	}
 }
 void PlayerMovement(char playerDir)
