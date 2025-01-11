@@ -71,4 +71,4 @@ Note: Can use different symbols for players etc  for  better visualization.
 ----------
 
 ## Current progress:
-- A few versions away from a basic bomberman game
+- Everything almost complete, game win condition remaining only
