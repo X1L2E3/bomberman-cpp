@@ -3,17 +3,16 @@
 #include <windows.h>
 #include <thread>
 #include <fstream>
-#include "colors.h"
 using namespace std;
 
 bool gameOver = false, stageOver = false, stageWin = false, exitGame = false, menu = true, gamePlayed = true;
-const int ROWS = 11, COLS = 41;
+const int ROWS = 11, COLS = 21;
 const DWORD enemyInterval = 1000, bombInterval = 3000;
 char grid[ROWS][COLS];
 int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombsPlaced = 0, playerBombLevel = 2;
 int levelCount = 1, enemyPos[4][COLS], obstacleCount = 20, powerupCount = 5, enemyCount = 3;
 int topScores[10] = { 0 };
-time_t lastTime;
+int gateX = -1, gateY = -1;
 DWORD bombTime[ROWS][COLS], stageTime, moveTime, enemyTime = GetTickCount();
 
 void SaveTopScores(); void LoadTopScores(); void UpdateTopScores(); void DisplayTopScores();
@@ -23,8 +22,8 @@ void StageSetObstacles(int obstacles); void StageSetEnemies(int enemies);
 void StageSetPowerups(int powerups); void StageSetLevel(int level);
 void StageSetup(); void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs, int score);
 void EnemyMovement(); void EnemyTimer();
-void PlayerInteraction(char object); void PlayerMovement(char playerDir);
-void BombExplosion(int bombRow, int bombCol); void BombTimer();
+void PlayerMovement(char playerDir);
+void BombInteraction(char object); void BombExplosion(int bombRow, int bombCol); void BombTimer();
 void Timeout(DWORD t = 15);
 
 int main()
@@ -116,6 +115,11 @@ void StageSetObstacles(int obstacles)
 		{
 			grid[r][c] = 'O';
 			obstacles--;
+			if (((gateX == -1 && gateY == -1) && (rand() % obstacles == 0)) || obstacles == 1)
+			{
+				gateX = r;
+				gateY = c;
+			}
 		}
 	}
 }
@@ -186,6 +190,7 @@ void StageSetup()
 	cout << "\n\n\t\tSTAGE " << levelCount;
 	Timeout();
 
+	gateX = gateY = -1;
 	enemyTime = stageTime = GetTickCount();
 	playerRow = playerCol = 1;
 	stageOver = false;
@@ -267,12 +272,19 @@ void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs, i
 	levelCount = level;
 	playerBombs = bombs;
 }
-void StageOver()
+void StageLose()
 {
-	
 	stageOver = true;
 	stageWin = false;
 	if (playerLives > 0) playerLives--;
+}
+void StageWin()
+{
+	if (enemyCount == 0)
+	{
+		stageWin = true;
+		stageOver = false;
+	}
 }
 
 void EnemyMovement()
@@ -301,7 +313,7 @@ void EnemyMovement()
 
 			if (newR == playerRow && newC == playerCol)
 			{
-				StageOver();
+				StageLose();
 			}
 			else if (grid[newR][newC] == 'X')
 			{
@@ -340,6 +352,19 @@ void EnemyTimer()
 	}
 }
 
+void BombInteraction(char type)
+{
+	switch (type)
+	{
+	case 'O':
+		obstacleCount--;
+		break;
+	case 'E':
+		playerScore += 5;
+		enemyCount--;
+		break;
+	}
+}
 void BombExplosion(int bombRow, int bombCol)
 {
 	if (grid[bombRow][bombCol] == 'B' || grid[bombRow][bombCol] == 'P')
@@ -347,7 +372,7 @@ void BombExplosion(int bombRow, int bombCol)
 		playerBombsPlaced--;
 		bool forced = false;
 		
-		if (grid[bombRow][bombCol] == 'P') StageOver();
+		if (grid[bombRow][bombCol] == 'P') StageLose();
 		grid[bombRow][bombCol] = 'X';
 		for (int dir = 0; dir < 4; dir++)
 		{
@@ -365,16 +390,16 @@ void BombExplosion(int bombRow, int bombCol)
 					if (newRow == playerRow && newCol == playerCol)
 					{
 						grid[newRow][newCol] = '!';
-						StageOver();
+						StageLose();
 					}
 					else if (grid[newRow][newCol] == ' ' || grid[newRow][newCol] == '+'|| grid[newRow][newCol] == 'E')
 					{
-						PlayerScore(grid[newRow][newCol]);
+						BombInteraction(grid[newRow][newCol]);
 						grid[newRow][newCol] = 'X';
 					}
 					else if (grid[newRow][newCol] == 'O')
 					{
-						PlayerScore(grid[newRow][newCol]);
+						BombInteraction(grid[newRow][newCol]);
 						grid[newRow][newCol] = 'X';
 						break;
 					}
@@ -447,11 +472,12 @@ void PlayerInteraction(char object)
 	{
 	case '+':
 		playerBombs++;
-		playerScore += 5;
+		playerScore += 1;
 		break;
 	case 'X':
 	case 'E':
-		StageOver();
+		StageLose();
+		break;
 	}
 }
 void PlayerMovement(char playerDir)
@@ -486,24 +512,7 @@ void PlayerMovement(char playerDir)
 		playerCol = newCol;
 	}
 	grid[playerRow][playerCol] = 'P';
-}
-void PlayerScore(char type)
-{
-	switch (type)
-	{
-	case 'O':
-		playerScore += 10;
-		obstacleCount--;
-		break;
-	case 'E':
-		playerScore += 50;
-		enemyCount--;
-		if (enemyCount == 0)
-		{
-			stageWin = true;
-			stageOver = true;
-		}
-	}
+	if (playerRow == gateX && playerCol == gateY) StageWin();
 }
 
 void Input()
@@ -560,7 +569,8 @@ void Draw()
 	SetCursorPosition(0, 0);
 	SetConsoleColor(5);
 	
-	cout << "DEBUG: Bombs " << playerBombs << "\tPlaced: " << playerBombsPlaced << "\n";
+	cout << "DEBUG: Enemies: " << enemyCount << endl;
+	cout << "Player: " << playerRow << " " << playerCol << "\tGate: " << gateX << " " << gateY << endl;
 	cout << "Score: " << playerScore << "\tLives: " << playerLives << endl << endl;
 
 	for (int i = 0; i <= ROWS-1; i++)
@@ -581,9 +591,23 @@ void Draw()
 			}
 			else if (playerRow == i && playerCol == j)
 			{
-				SetConsoleColor(167);
-				if (GetTickCount() - moveTime < 250) cout << ' ';
-				else cout << "+";
+				if (grid[i][j] == 'P')
+				{
+					SetConsoleColor(167);
+					if (GetTickCount() - moveTime < 250) cout << ' ';
+					else cout << "+";
+				}
+				else if (grid[i][j] == '!')
+				{
+					SetConsoleColor(197);
+					cout << '!';
+				}
+			}
+			else if (grid[i][j] == ' ' && (gateX == i && gateY == j))
+			{
+				SetConsoleColor(5);
+				cout << 'I';
+				break;
 			}
 			else
 			{
@@ -627,29 +651,29 @@ void Menu()
 	while (menu)
 	{
 		SetCursorPosition(0, 0);
-		SetConsoleColor(menuTitleC);
+		SetConsoleColor(192);
 		cout << "\t======================\n";
 		cout << "\t=  BOMBER-MAN CLONE  =\n";
 		cout << "\t======================\n\n";
 		if (selection == 1)
 		{
-			a = menuItemActiveC;
-			b = c = d = menuItemC;
+			a = 240;
+			b = c = d = 7;
 		}
 		else if (selection == 2)
 		{
-			a = c = d = menuItemC;
-			b = menuItemActiveC;
+			a = c = d = 7;
+			b = 240;
 		}
 		else if (selection == 3)
 		{
-			a = b = d = menuItemC;
-			c = menuItemActiveC;
+			a = b = d = 7;
+			c = 240;
 		}
 		else if (selection == 4)
 		{
-			a = b = c = menuItemC;
-			d = menuItemActiveC;
+			a = b = c = 7;
+			d = 240;
 		}
 
 		SetConsoleColor(a);
@@ -661,9 +685,9 @@ void Menu()
 		SetConsoleColor(d);
 		cout << "\t\tExit";
 
-		SetConsoleColor(menuKeyC);
+		SetConsoleColor(6);
 		cout << "\n\n\t[Arrow keys]\tMove\n\t[Enter]\t\tSelect\n\t[Esc]\t\tQuit\n";
-		SetConsoleColor(defaultC);
+		SetConsoleColor(5);
 
 		char key = _getch();
 		switch (key)
