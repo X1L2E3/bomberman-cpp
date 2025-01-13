@@ -1,74 +1,75 @@
 # Bomberman
-The Bomberman game in C++, without use of SFML library
+The Bomberman game in C++, without use of SFML library.
+
+**Note: This game is developed using basic knowledge of C++ and a few select advanced methodologies that are documented.**
 
 ## Description
 Bomberman Clone is a grid-based arcade game where the player strategically places bombs to destroy obstacles and defeat enemies. The game involves elements of timing, strategy, and survival. The player must avoid enemies and explosions while aiming to clear all enemies to win.
 
-This is a simplified version of the classic Bomberman game. The features and details to be implemented are provided below.
+This is not a meant to be a direct copy, rather a re-imagining of the game in a different development environment.
 
 ## Gameplay
-Player vs. Enemies and Obstacles
+**Fundamentally: Player vs. Enemies and Obstacles**
 
-1. The game field is divided into rows and columns, represented by a 2D array.
-2. The player is represented by 'P' and starts at a fixed position on the grid.
-3. Enemies are represented by 'E' and are placed randomly at the beginning of the game.
-4. Bombs are placed by the player using a key (e.g., spacebar) and represented as 'B' in the grid.
-5. The bomb explodes after a 3-second timer, clearing destructible obstacles ('O') and damaging enemies ('E').
-6. The explosion radius extends horizontally and vertically, marked temporarily as 'X'.
-7. Obstacles are represented by:
-   - 'O': Destructible blocks that disappear when hit by an explosion.
-   - '#': Indestructible walls that block movement and explosions.
-8. The player can move freely across empty spaces (' '), but their movement is restricted by obstacles, walls, and the grid boundaries.
-Note: Can use different symbols for players etc  for  better visualization.
+1. The game field is divided into a **grid** of rows and columns, represented by a 2D array.
+2. The player represented by **green box** starts at a fixed position on the grid.
+3. Enemies represented by **purple boxes** are placed randomly in the grid.
+4. Bombs placed by the player are represented by a **phasing red box** in the grid.
+5. The bomb explodes after a 3-second timer, clearing destructible obstacles and damaging enemies.
+6. The bomb's explosion radius extends horizontally and vertically, marking its path temporarily as red boxes.
+7. Obstacles represented by blue box have to be cleared in order to find the gate.
+8. The gate represented by letter 'I' is where the player enters after clearing the enemies from the grid.
+9. The walls represented by grey boxes are indestructible and have to be traversed around.
+10. The player can get more abilities by acquiring power-ups represented by letter '+'.
+11. The game features multiple stages, with every stage having increased difficulty.
 
-## Features to Implement
+## Features
 ### Player Movement
    - The player moves using arrow keys.
-   - Movement is restricted by obstacles ('O') and walls ('#').
+   - The movement of player has a speed limited by its stamina.
+     - The stamina is represented by the letter '+'.
+     - Stamina can be increased by power-ups.
 
 ### Bomb Placement
    - Bombs are placed at the player's position and detonate after a fixed delay.
    - Bomb explosions clear destructible obstacles and damage enemies.
+   - Multiple bomb placement ability and special bombs can be acquired by power-ups.
+     - Mobile bomb: This bomb when kicked by the player slides in the direction until it hits an obstacle.
+     - Jumping bomb: The player can flung the bomb across a single obstacle.
+     - Controlled bomb: This bomb can be detonated before its timer by a key press.
 
 ### Enemy 
-   - Enemies move randomly within the grid but avoid walls and obstacles..
+   - Enemies move in a random direction at a fixed speed.
+   - Enemy movement speed increases with difficulty.
+   - Special enemies can chase player and go through obstacles.
 
-### Explosion Logic
-   - Bomb explosions have a fixed range and affect all entities within the radius (enemies, obstacles, player).
-   - The explosion lasts for a short duration and then resets the affected cells to empty (' ').
-
-### Power-ups (Bonus)
-   - Add power-ups that grant abilities like increased speed, bomb range, or multiple bombs.
+### Power-ups
+   - Every stage features a set number of power-ups.
+   - Power-ups are acquired in three ways:
+     - Catching the letter '+' in the grid.
+     - Defeating special enemies.
+     - Destroying obstacles hiding power-ups.
 
 ### Win and Lose Conditions
-   - The player wins by eliminating all enemies.
+   - The player has to eliminate all enemies in the grid.
+   - The player has to then find the gate hidden within the obstacles.
    - The player loses if caught in an explosion or collides with an enemy.
-### File Handling
-   - Store the top 3 max score in a txt file
-### Sound
-   - Add sound effects for bomb planting and detonating.
-### Stages
-   - Create at least 2 stages
+   - The player wins the stage if it goes through the gate after eliminating enemies.
 
-## Scoring
-- Destroying enemies: 50 points per enemy
-- Destroying obstacles: 10 points per obstacle
-- Picking up power-ups: 20 points per power-up
+### Score
+   - The game keep tracks of scores acquired by the player.
+     - Defeating an enemy gives 5 score.
+     - Getting a power-up gives 1 score.
+     - Winning the stage gives 10 score.
+   - Top scores are stored locally in a file.
+
+### Sound (pending)
+   - The game features sound effects for various events.
+   - Sounds can be muted in the Main Menu.
+
+### Stages
+   - The game will have a fixed number of stages.
 
 ## Other features
-1. Multiple Levels: Increase the number of enemies and obstacles with each level.
-2. Dynamic Obstacles: Introduce new obstacle types like moving blocks.
-3. Multiplayer Mode: Allow two players to compete on the same grid.
-
-## Legend:
-- 'P': Player
-- 'E': Enemy
-- 'O': Destructible Obstacle
-- '#': Indestructible Wall
-- ' ': Empty Space
-- '+': Power-Up (e.g., increased bomb range)
-
-----------
-
-## Current progress:
-- Everything almost complete, game win condition remaining only
+1. Multiplayer mode: The game will allow two players to play at the same time.
+2. Timer: The game keeps track of time for speed-runners.
