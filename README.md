@@ -1,4 +1,6 @@
-# Bomberman
+![Bomberman in C++](title.png)
+
+---
 The Bomberman game in C++, without use of SFML library.
 
 **Note: This game is developed using basic knowledge of C++ and a few select advanced methodologies that are documented.**

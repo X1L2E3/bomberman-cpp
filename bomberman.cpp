@@ -168,19 +168,19 @@ void StageSetLevel(int level)
 	switch (level)
 	{
 		case 1:
-		obstacleCount = 25, powerupCount = 0, enemyCount = 1;
+		obstacleCount = 5, powerupCount = 0, enemyCount = 1;
 		break;
 		case 2:
-		obstacleCount = 25, powerupCount = 0, enemyCount = 2;
+		obstacleCount = 10, powerupCount = 0, enemyCount = 2;
 		break;
 		case 3:
-		obstacleCount = 35, powerupCount = 1, enemyCount = 3;
+		obstacleCount = 15, powerupCount = 1, enemyCount = 2;
 		break;
 		case 4:
-		obstacleCount = 45, powerupCount = 2, enemyCount = 5;
+		obstacleCount = 20, powerupCount = 2, enemyCount = 3;
 		break;
 		case 5:
-		obstacleCount = 50, powerupCount = 2, enemyCount = 7;
+		obstacleCount = 25, powerupCount = 2, enemyCount = 5;
 		break;
 	}
 }
@@ -499,16 +499,21 @@ void PlayerMovement(char playerDir)
 
 	if (grid[newRow][newCol] == ' ')
 	{
+		grid[newRow][newCol] = 'P';
 		playerRow = newRow;
 		playerCol = newCol;
 	}
 	else if (grid[newRow][newCol] == 'E' || grid[newRow][newCol] == '+' || grid[newRow][newCol] == 'X')
 	{
 		PlayerInteraction(grid[newRow][newCol]);
+		grid[newRow][newCol] = 'P';
 		playerRow = newRow;
 		playerCol = newCol;
 	}
-	grid[playerRow][playerCol] = 'P';
+	else
+	{
+		grid[playerRow][playerCol] = 'P';
+	}
 	if (playerRow == gateX && playerCol == gateY) StageWin();
 }
 
@@ -572,6 +577,7 @@ void Draw()
 
 	for (int i = 0; i <= ROWS-1; i++)
 	{
+		cout << "\t";
 		for (int j = 0; j <= COLS-1; j++)
 		{
 			if ((GetTickCount() - bombTime[i][j] >= 500 && GetTickCount() - bombTime[i][j] < 1000) ||
@@ -596,7 +602,7 @@ void Draw()
 				}
 				else if (grid[i][j] == '!')
 				{
-					SetConsoleColor(197);
+					SetConsoleColor(5);
 					cout << '!';
 				}
 			}
@@ -604,7 +610,6 @@ void Draw()
 			{
 				SetConsoleColor(5);
 				cout << 'I';
-				break;
 			}
 			else
 			{
@@ -630,9 +635,10 @@ void Draw()
 					SetConsoleColor(270);
 					cout << '+';
 					break;
+				case ' ':
 				default:
 					SetConsoleColor(0);
-					cout << grid[i][j];
+					cout << ' ';
 				}
 			}
 		}
@@ -643,7 +649,8 @@ void Draw()
 }
 void Menu()
 {
-	int selection = 1, a, b, c, d;
+	int sel = 1, a, b, c, d;
+	char key;
 
 	while (menu)
 	{
@@ -652,66 +659,70 @@ void Menu()
 		cout << "\t======================\n";
 		cout << "\t=  BOMBER-MAN CLONE  =\n";
 		cout << "\t======================\n\n";
-		if (selection == 1)
+		if (sel == 1)
 		{
 			a = 240;
 			b = c = d = 7;
 		}
-		else if (selection == 2)
+		else if (sel == 2)
 		{
 			a = c = d = 7;
 			b = 240;
 		}
-		else if (selection == 3)
+		else if (sel == 3)
 		{
 			a = b = d = 7;
 			c = 240;
 		}
-		else if (selection == 4)
+		else if (sel == 4)
 		{
 			a = b = c = 7;
 			d = 240;
 		}
 
 		SetConsoleColor(a);
-		cout << "\tPlay";
+		if (sel == 1 && (GetTickCount() % 1000 < 500)) cout << "\t> Play";
+		else cout << "\t  Play";
 		SetConsoleColor(b);
-		cout << "\t\tHelp";
+		if (sel == 2 && (GetTickCount() % 1000 < 500)) cout << "\t\t> Help";
+		else cout << "\t\t  Help";
 		SetConsoleColor(c);
-		cout << "\n\tScores";
+		if (sel == 3 && (GetTickCount() % 1000 < 500)) cout << "\n\t> Scores";
+		else cout << "\n\t  Scores";
 		SetConsoleColor(d);
-		cout << "\t\tExit";
+		if (sel == 4 && (GetTickCount() % 1000 < 500)) cout << "\t> Exit";
+		else cout << "\t  Exit";
 
 		SetConsoleColor(6);
 		cout << "\n\n\t[Arrow keys]\tMove\n\t[Enter]\t\tSelect\n\t[Esc]\t\tQuit\n";
 		SetConsoleColor(5);
 
-		char key = _getch();
+		if (_kbhit()) key = _getch();
 		switch (key)
 		{
 		case 'a':
 		case 75:
-			if (selection > 1)
-				selection--;
+			if (sel > 1)
+				sel--;
 			break;
 		case 'd':
 		case 77:
-			if (selection < 4)
-				selection++;
+			if (sel < 4)
+				sel++;
 			break;
 		case 'w':
 		case 72:
-			if (selection > 2)
-				selection -= 2;
+			if (sel > 2)
+				sel -= 2;
 			break;
 		case 's':
 		case 80:
-			if (selection < 3)
-				selection += 2;
+			if (sel < 3)
+				sel += 2;
 			break;
 		case 'e':
 		case 13:
-			switch (selection)
+			switch (sel)
 			{
 			case 1:
 				gameOver = false;
@@ -743,6 +754,7 @@ void Menu()
 			gamePlayed = false;
 			break;
 		}
+		key = '\0';
 	}
 }
 void Game()
