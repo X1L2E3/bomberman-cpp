@@ -9,7 +9,7 @@ bool gameOver = false, stageOver = false, stageWin = false, exitGame = false, me
 const int ROWS = 11, COLS = 21;
 const DWORD enemyInterval = 1000, bombInterval = 3000;
 char grid[ROWS][COLS];
-int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombsPlaced = 0, playerBombLevel = 2;
+int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombsPlaced = 0, playerBombLevel = 2, playerKills = 0;
 int levelCount = 1, enemyPos[4][COLS], obstacleCount = 20, powerupCount = 5, enemyCount = 3;
 int topScores[10] = { 0 };
 int gateX = -1, gateY = -1;
@@ -19,7 +19,7 @@ void SaveTopScores(); void LoadTopScores(); void UpdateTopScores(); void Display
 void SetCursorPosition(short int x, short int y); void SetConsoleColor(int c); void ShowConsoleCursor(bool visible);
 void Menu(); void Draw(); void Input(); void Game(); void PlayerScore(char type);
 void StageSetObstacles(int obstacles); void StageSetEnemies(int enemies);
-void StageSetPowerups(int powerups); void StageSetLevel(int level);
+void StageSetPowerups(int powerups); void StageSetLevel(int level); void StageWin();
 void StageSetup(); void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs, int score);
 void EnemyMovement(); void EnemyTimer();
 void PlayerMovement(char playerDir);
@@ -194,7 +194,7 @@ void StageSetup()
 	enemyTime = stageTime = GetTickCount();
 	playerRow = playerCol = 1;
 	stageOver = false;
-	playerBombsPlaced = 0;
+	playerBombsPlaced = playerKills = 0;
 
 	for (int r = 0; r <= ROWS-1; r++)
 	{
@@ -280,10 +280,10 @@ void StageLose()
 }
 void StageWin()
 {
-	if (enemyCount == 0)
+	if (playerKills == enemyCount)
 	{
 		stageWin = true;
-		stageOver = false;
+		stageOver = true;
 	}
 }
 
@@ -356,12 +356,9 @@ void BombInteraction(char type)
 {
 	switch (type)
 	{
-	case 'O':
-		obstacleCount--;
-		break;
 	case 'E':
 		playerScore += 5;
-		enemyCount--;
+		playerKills++;
 		break;
 	}
 }
@@ -569,7 +566,7 @@ void Draw()
 	SetCursorPosition(0, 0);
 	SetConsoleColor(5);
 	
-	cout << "DEBUG: Enemies: " << enemyCount << endl;
+	cout << "[DEBUG] Enemies: " << enemyCount << "\tKills: " << playerKills << endl;
 	cout << "Player: " << playerRow << " " << playerCol << "\tGate: " << gateX << " " << gateY << endl;
 	cout << "Score: " << playerScore << "\tLives: " << playerLives << endl << endl;
 
