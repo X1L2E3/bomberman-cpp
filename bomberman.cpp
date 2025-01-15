@@ -318,7 +318,8 @@ void EnemyMovement()
 			else if (grid[newR][newC] == 'X')
 			{
 				grid[r][c] = ' ';
-				break;
+				playerScore += 5;
+				playerKills++;
 			}
 			else if (grid[newR][newC] == ' ')
 			{
