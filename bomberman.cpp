@@ -5,14 +5,17 @@
 #include <fstream>
 using namespace std;
 
+#define ROWS 11
+#define COLS 21
+#define enemyInterval 1000
+#define bombInterval 3000
+
 bool gameOver = false, stageOver = false, stageWin = false, exitGame = false, menu = true, gamePlayed = true;
-const int ROWS = 11, COLS = 21;
-const DWORD enemyInterval = 1000, bombInterval = 3000;
 char grid[ROWS][COLS];
-int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombsPlaced = 0, playerBombLevel = 2, playerKills = 0;
-int levelCount = 1, enemyPos[4][COLS], obstacleCount = 20, powerupCount = 5, enemyCount = 3;
+short int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombsPlaced = 0, playerBombLevel = 2, playerKills = 0;
+short int levelCount = 1, enemyPos[4][COLS], obstacleCount = 20, powerupCount = 5, enemyCount = 3;
 int topScores[10] = { 0 };
-int gateX = -1, gateY = -1;
+short int gateRow = -1, gateColumn = -1;
 DWORD bombTime[ROWS][COLS], stageTime, moveTime, enemyTime = GetTickCount();
 
 void SaveTopScores(); void LoadTopScores(); void UpdateTopScores(); void DisplayTopScores();
@@ -115,10 +118,10 @@ void StageSetObstacles(int obstacles)
 		{
 			grid[r][c] = 'O';
 			obstacles--;
-			if (((gateX == -1 && gateY == -1) && (rand() % obstacles == 0)) || obstacles == 1)
+			if (((gateRow == -1 && gateColumn == -1) && (rand() % obstacles == 0)) || obstacles == 1)
 			{
-				gateX = r;
-				gateY = c;
+				gateRow = r;
+				gateColumn = c;
 			}
 		}
 	}
@@ -190,7 +193,7 @@ void StageSetup()
 	cout << "\n\n\t\tSTAGE " << levelCount;
 	Timeout();
 
-	gateX = gateY = -1;
+	gateRow = gateColumn = -1;
 	enemyTime = stageTime = GetTickCount();
 	playerRow = playerCol = 1;
 	stageOver = false;
@@ -515,7 +518,7 @@ void PlayerMovement(char playerDir)
 	{
 		grid[playerRow][playerCol] = 'P';
 	}
-	if (playerRow == gateX && playerCol == gateY) StageWin();
+	if (playerRow == gateRow && playerCol == gateColumn) StageWin();
 }
 
 void Input()
@@ -572,8 +575,6 @@ void Draw()
 	SetCursorPosition(0, 0);
 	SetConsoleColor(5);
 	
-	cout << "[DEBUG] Enemies: " << enemyCount << "\tKills: " << playerKills << endl;
-	cout << "Player: " << playerRow << " " << playerCol << "\tGate: " << gateX << " " << gateY << endl;
 	cout << "Score: " << playerScore << "\tLives: " << playerLives << endl << endl;
 
 	for (int i = 0; i <= ROWS-1; i++)
@@ -607,7 +608,7 @@ void Draw()
 					cout << '!';
 				}
 			}
-			else if (grid[i][j] == ' ' && (gateX == i && gateY == j))
+			else if (grid[i][j] == ' ' && (gateRow == i && gateColumn == j))
 			{
 				SetConsoleColor(5);
 				cout << 'I';
