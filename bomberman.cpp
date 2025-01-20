@@ -1,3 +1,5 @@
+// Remaining powerups: 2
+
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
@@ -12,8 +14,8 @@ using namespace std;
 
 bool gameOver = false, stageOver = false, stageWin = false, exitGame = false, menu = true, gamePlayed = true;
 char grid[ROWS][COLS];
-short int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombsPlaced = 0, playerBombLevel = 2, playerKills = 0;
-short int levelCount = 1, enemyPos[4][COLS], obstacleCount = 20, powerupCount = 5, enemyCount = 3;
+short int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombsPlaced = 0, playerBombLevel = 2, playerBombType = 0, playerKills = 0;
+short int levelCount = 1, enemyPos[4][10], obstacleCount = 20, powerupCount = 5, enemyCount = 3;
 int topScores[10] = { 0 };
 short int gateRow = -1, gateColumn = -1;
 DWORD bombTime[ROWS][COLS], stageTime, moveTime, enemyTime = GetTickCount();
@@ -23,7 +25,7 @@ void SetCursorPosition(short int x, short int y); void SetConsoleColor(int c); v
 void Menu(); void Draw(); void Input(); void Game(); void PlayerScore(char type);
 void StageSetObstacles(int obstacles); void StageSetEnemies(int enemies);
 void StageSetPowerups(int powerups); void StageSetLevel(int level); void StageWin();
-void StageSetup(); void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs, int score);
+void StageSetup(); void StagePlay(int level, int score);
 void EnemyMovement(); void EnemyTimer();
 void PlayerMovement(char playerDir);
 void BombInteraction(char object); void BombExplosion(int bombRow, int bombCol); void BombTimer();
@@ -105,6 +107,22 @@ void ShowConsoleCursor(bool visible)
     SetConsoleCursorInfo(out, &cursorInfo);
 }
 
+void StageAbility()
+{
+	cout << "Choose powerup: \n(1) Mobile bomb\n(2) Jumping bomb\n(3) Controlled bomb";
+	switch(_getch())
+	{
+		case 1:
+		playerBombType = 1;
+		break;
+		case 2:
+		playerBombType = 2;
+		break;
+		case 3:
+		playerBombType = 3;
+		break;
+	}
+}
 void StageSetObstacles(int obstacles)
 {
 	while (obstacles)
@@ -174,16 +192,31 @@ void StageSetLevel(int level)
 		obstacleCount = 5, powerupCount = 0, enemyCount = 1;
 		break;
 		case 2:
-		obstacleCount = 10, powerupCount = 0, enemyCount = 2;
+		obstacleCount = 5, powerupCount = 0, enemyCount = 2;
 		break;
 		case 3:
-		obstacleCount = 15, powerupCount = 1, enemyCount = 2;
+		obstacleCount = 10, powerupCount = 1, enemyCount = 2;
 		break;
 		case 4:
-		obstacleCount = 20, powerupCount = 2, enemyCount = 3;
+		obstacleCount = 10, powerupCount = 0, enemyCount = 3;
 		break;
 		case 5:
-		obstacleCount = 25, powerupCount = 2, enemyCount = 5;
+		obstacleCount = 15, powerupCount = 0, enemyCount = 4;
+		break;
+		case 6:
+		obstacleCount = 15, powerupCount = 1, enemyCount = 4;
+		break;
+		case 7:
+		obstacleCount = 20, powerupCount = 0, enemyCount = 5;
+		break;
+		case 8:
+		obstacleCount = 20, powerupCount = 1, enemyCount = 6;
+		break;
+		case 9:
+		obstacleCount = 25, powerupCount = 0, enemyCount = 6;
+		break;
+		case 10:
+		obstacleCount = 25, powerupCount = 1, enemyCount = 7;
 		break;
 	}
 }
@@ -230,9 +263,9 @@ void StageSetup()
 	grid[playerRow][playerCol] = 'P';
 
 	system("cls");
-	StagePlay(levelCount, obstacleCount, powerupCount, enemyCount, playerBombs, playerScore);
+	StagePlay(levelCount, playerScore);
 }
-void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs, int score)
+void StagePlay(int level, int score)
 {
 	while (!stageOver)
 	{
@@ -248,9 +281,11 @@ void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs, i
 		cout << "\n\n\tYou win!\n";
 		Timeout(10);
 
-		if (level < 5)
-			level++;
-		else
+		if (level == 3)
+			StageAbility();
+		else if (level == 7)
+			StageAbility();
+		else if (level == 10)
 			gameOver = true;
 	}
 	else if (gamePlayed == true)
@@ -268,12 +303,6 @@ void StagePlay(int level, int obstacles, int powerups, int enemies, int bombs, i
 			gameOver = true;
 		}
 	}
-
-	obstacleCount = obstacles;
-	enemyCount = enemies;
-	powerupCount = powerups;
-	levelCount = level;
-	playerBombs = bombs;
 }
 void StageLose()
 {
@@ -514,9 +543,48 @@ void PlayerMovement(char playerDir)
 		playerRow = newRow;
 		playerCol = newCol;
 	}
-	else
+	else if (grid[newRow][newCol] == 'B')
 	{
-		grid[playerRow][playerCol] = 'P';
+		if (playerBombType == 1)
+		{
+			if (playerDir == 'u')
+			{
+				if (bombTime[newRow - 1][newCol] == 0)
+				{
+					bombTime[newRow - 1][newCol] = bombTime[newRow][newCol];
+					grid[newRow - 1][newCol] = 'B';
+				}
+			}
+			else if (playerDir == 'd')
+			{
+				if (bombTime[newRow + 1][newCol] == 0)
+				{
+					bombTime[newRow + 1][newCol] = bombTime[newRow][newCol];
+					grid[newRow + 1][newCol] = 'B';
+				}
+			}
+			else if (playerDir == 'r')
+			{
+				if (bombTime[newRow][newCol + 1] == 0)
+				{
+					bombTime[newRow][newCol + 1] = bombTime[newRow][newCol];
+					grid[newRow][newCol + 1] = 'B';
+				}
+			}
+			else if (playerDir == 'l')
+			{
+				if (bombTime[newRow][newCol - 1] == 0)
+				{
+					bombTime[newRow][newCol - 1] = bombTime[newRow][newCol];
+					grid[newRow][newCol - 1] = 'B';
+				}
+			}
+			
+			bombTime[newRow][newCol] = 0;
+			grid[newRow][newCol] = 'P';
+			playerRow = newRow;
+			playerCol = newCol;
+		}
 	}
 	if (playerRow == gateRow && playerCol == gateColumn) StageWin();
 }
