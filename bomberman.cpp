@@ -14,7 +14,7 @@ using namespace std;
 
 bool gameOver = false, stageOver = false, stageWin = false, exitGame = false, menu = true, gamePlayed = true;
 char grid[ROWS][COLS];
-short int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombsPlaced = 0, playerBombLevel = 2, playerBombType = 0, playerKills = 0;
+short int playerRow = 1, playerCol = 1, playerScore = 0, playerLives = 3, playerBombs = 1, playerBombsPlaced = 0, playerBombLevel = 2, playerBombType = 1, playerKills = 0;
 short int levelCount = 1, enemyPos[4][10], obstacleCount = 20, powerupCount = 5, enemyCount = 3;
 int topScores[10] = { 0 };
 short int gateRow = -1, gateColumn = -1;
@@ -532,14 +532,12 @@ void PlayerMovement(char playerDir)
 
 	if (grid[newRow][newCol] == ' ')
 	{
-		grid[newRow][newCol] = 'P';
 		playerRow = newRow;
 		playerCol = newCol;
 	}
 	else if (grid[newRow][newCol] == 'E' || grid[newRow][newCol] == '+' || grid[newRow][newCol] == 'X')
 	{
 		PlayerInteraction(grid[newRow][newCol]);
-		grid[newRow][newCol] = 'P';
 		playerRow = newRow;
 		playerCol = newCol;
 	}
@@ -549,43 +547,56 @@ void PlayerMovement(char playerDir)
 		{
 			if (playerDir == 'u')
 			{
-				if (bombTime[newRow - 1][newCol] == 0)
+				if (bombTime[newRow - 1][newCol] == 0 && grid[newRow - 1][newCol] == ' ')
 				{
 					bombTime[newRow - 1][newCol] = bombTime[newRow][newCol];
 					grid[newRow - 1][newCol] = 'B';
+					bombTime[newRow][newCol] = 0;
+					grid[newRow][newCol] = 'P';
+					playerRow = newRow;
+					playerCol = newCol;
 				}
 			}
 			else if (playerDir == 'd')
 			{
-				if (bombTime[newRow + 1][newCol] == 0)
+				if (bombTime[newRow + 1][newCol] == 0 && grid[newRow + 1][newCol] == ' ')
 				{
 					bombTime[newRow + 1][newCol] = bombTime[newRow][newCol];
 					grid[newRow + 1][newCol] = 'B';
+					bombTime[newRow][newCol] = 0;
+					grid[newRow][newCol] = 'P';
+					playerRow = newRow;
+					playerCol = newCol;
 				}
 			}
 			else if (playerDir == 'r')
 			{
-				if (bombTime[newRow][newCol + 1] == 0)
+				if (bombTime[newRow][newCol + 1] == 0 && grid[newRow][newCol + 1] == ' ')
 				{
 					bombTime[newRow][newCol + 1] = bombTime[newRow][newCol];
 					grid[newRow][newCol + 1] = 'B';
+					bombTime[newRow][newCol] = 0;
+					grid[newRow][newCol] = 'P';
+					playerRow = newRow;
+					playerCol = newCol;
 				}
 			}
 			else if (playerDir == 'l')
 			{
-				if (bombTime[newRow][newCol - 1] == 0)
+				if (bombTime[newRow][newCol - 1] == 0 && grid[newRow][newCol - 1] == ' ')
 				{
 					bombTime[newRow][newCol - 1] = bombTime[newRow][newCol];
 					grid[newRow][newCol - 1] = 'B';
+					bombTime[newRow][newCol] = 0;
+					grid[newRow][newCol] = 'P';
+					playerRow = newRow;
+					playerCol = newCol;
 				}
 			}
-			
-			bombTime[newRow][newCol] = 0;
-			grid[newRow][newCol] = 'P';
-			playerRow = newRow;
-			playerCol = newCol;
 		}
 	}
+
+	grid[playerRow][playerCol] = 'P';
 	if (playerRow == gateRow && playerCol == gateColumn) StageWin();
 }
 
