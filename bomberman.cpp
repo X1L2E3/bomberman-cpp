@@ -1,4 +1,4 @@
-// Remaining powerups: 2
+// Remaining powerups: 1
 
 #include <iostream>
 #include <conio.h>
@@ -512,7 +512,7 @@ void PlayerInteraction(char object)
 }
 void PlayerMovement(char playerDir)
 {
-	if (GetTickCount() - moveTime < 250) return;
+	if (GetTickCount() - moveTime < 250) while (GetTickCount() - moveTime < 250) if (_kbhit()) return;
 	moveTime = GetTickCount();
 
 	int newRow = playerRow;
