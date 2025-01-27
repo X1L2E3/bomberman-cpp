@@ -287,6 +287,7 @@ void StagePlay(int level, int score)
 			StageAbility();
 		else if (level == 10)
 			gameOver = true;
+		levelCount++;
 	}
 	else if (gamePlayed == true)
 	{
@@ -705,6 +706,7 @@ void Draw()
 	SetCursorPosition(0, 0);
 	SetConsoleColor(5);
 	
+	cout << "DEBUG: " << "Player Kills: " << playerKills << endl;
 	cout << "Score: " << playerScore << "\tLives: " << playerLives << endl << endl;
 
 	for (int i = 0; i <= ROWS-1; i++)
