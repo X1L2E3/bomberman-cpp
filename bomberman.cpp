@@ -1,5 +1,3 @@
-// Remaining powerups: 1
-
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
@@ -27,7 +25,7 @@ void StageSetObstacles(int obstacles); void StageSetEnemies(int enemies);
 void StageSetPowerups(int powerups); void StageSetLevel(int level); void StageWin();
 void StageSetup(); void StagePlay(int level, int score);
 void EnemyMovement(); void EnemyTimer();
-void PlayerMovement(char playerDir);
+void PlayerMovement(char playerDir); void PlayerBombAbility(char pDir, int r, int c);
 void BombInteraction(char object); void BombExplosion(int bombRow, int bombCol); void BombTimer();
 void Timeout(DWORD t = 15);
 
@@ -544,112 +542,176 @@ void PlayerMovement(char playerDir)
 	}
 	else if (grid[newRow][newCol] == 'B')
 	{
-		if (playerBombType == 1)
-		{
-			if (playerDir == 'u')
-			{
-				if (bombTime[newRow - 1][newCol] == 0 && grid[newRow - 1][newCol] == ' ')
-				{
-					bombTime[newRow - 1][newCol] = bombTime[newRow][newCol];
-					grid[newRow - 1][newCol] = 'B';
-					bombTime[newRow][newCol] = 0;
-					grid[newRow][newCol] = 'P';
-					playerRow = newRow;
-					playerCol = newCol;
-				}
-			}
-			else if (playerDir == 'd')
-			{
-				if (bombTime[newRow + 1][newCol] == 0 && grid[newRow + 1][newCol] == ' ')
-				{
-					bombTime[newRow + 1][newCol] = bombTime[newRow][newCol];
-					grid[newRow + 1][newCol] = 'B';
-					bombTime[newRow][newCol] = 0;
-					grid[newRow][newCol] = 'P';
-					playerRow = newRow;
-					playerCol = newCol;
-				}
-			}
-			else if (playerDir == 'r')
-			{
-				if (bombTime[newRow][newCol + 1] == 0 && grid[newRow][newCol + 1] == ' ')
-				{
-					bombTime[newRow][newCol + 1] = bombTime[newRow][newCol];
-					grid[newRow][newCol + 1] = 'B';
-					bombTime[newRow][newCol] = 0;
-					grid[newRow][newCol] = 'P';
-					playerRow = newRow;
-					playerCol = newCol;
-				}
-			}
-			else if (playerDir == 'l')
-			{
-				if (bombTime[newRow][newCol - 1] == 0 && grid[newRow][newCol - 1] == ' ')
-				{
-					bombTime[newRow][newCol - 1] = bombTime[newRow][newCol];
-					grid[newRow][newCol - 1] = 'B';
-					bombTime[newRow][newCol] = 0;
-					grid[newRow][newCol] = 'P';
-					playerRow = newRow;
-					playerCol = newCol;
-				}
-			}
-		}
-		else if (playerBombType == 2)
-		{
-			if (playerDir == 'u')
-			{
-				if ((bombTime[newRow - 1][newCol] == 0 && bombTime[newRow - 2][newCol] == 0) && (grid[newRow - 1][newCol] == 'O' && grid[newRow - 2][newCol] == ' '))
-				{
-					bombTime[newRow - 2][newCol] = bombTime[newRow][newCol];
-					grid[newRow - 2][newCol] = 'B';
-					bombTime[newRow][newCol] = 0;
-					grid[newRow][newCol] = 'P';
-					playerRow = newRow;
-					playerCol = newCol;
-				}
-			}
-			else if (playerDir == 'd')
-			{
-				if ((bombTime[newRow + 1][newCol] == 0 && bombTime[newRow + 2][newCol] == 0) && (grid[newRow + 1][newCol] == 'O' && grid[newRow + 2][newCol] == ' '))
-				{
-					bombTime[newRow + 2][newCol] = bombTime[newRow][newCol];
-					grid[newRow + 2][newCol] = 'B';
-					bombTime[newRow][newCol] = 0;
-					grid[newRow][newCol] = 'P';
-					playerRow = newRow;
-					playerCol = newCol;
-				}
-			}
-			else if (playerDir == 'r')
-			{
-				if ((bombTime[newRow][newCol + 1] == 0 && bombTime[newRow][newCol + 2] == 0) && (grid[newRow][newCol + 1] == 'O' && grid[newRow][newCol + 2] == ' '))
-				{
-					bombTime[newRow][newCol + 2] = bombTime[newRow][newCol];
-					grid[newRow][newCol + 2] = 'B';
-					bombTime[newRow][newCol] = 0;
-					grid[newRow][newCol] = 'P';
-					playerRow = newRow;
-					playerCol = newCol;
-				}
-			}
-			else if (playerDir == 'l')
-			{
-				if ((bombTime[newRow][newCol - 1] == 0 && bombTime[newRow][newCol - 2] == 0) && (grid[newRow][newCol - 1] == 'O' && grid[newRow][newCol - 2] == ' '))
-				{
-					bombTime[newRow][newCol - 2] = bombTime[newRow][newCol];
-					grid[newRow][newCol - 2] = 'B';
-					bombTime[newRow][newCol] = 0;
-					grid[newRow][newCol] = 'P';
-					playerRow = newRow;
-					playerCol = newCol;
-				}
-			}
-		}
+		PlayerBombAbility(playerDir, newRow, newCol);
 	}
 
 	grid[playerRow][playerCol] = 'P';
 	if (playerRow == gateRow && playerCol == gateColumn) StageWin();
+}
+void PlayerBombAbility(char pDir, int r, int c)
+{
+	if (playerBombType == 1)
+	{
+		if (pDir == 'u')
+		{
+			if (bombTime[r - 1][c] == 0 && grid[r - 1][c] == ' ')
+			{
+				bombTime[r - 1][c] = bombTime[r][c];
+				grid[r - 1][c] = 'B';
+				bombTime[r][c] = 0;
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+			}
+		}
+		else if (pDir == 'd')
+		{
+			if (bombTime[r + 1][c] == 0 && grid[r + 1][c] == ' ')
+			{
+				bombTime[r + 1][c] = bombTime[r][c];
+				grid[r + 1][c] = 'B';
+				bombTime[r][c] = 0;
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+			}
+		}
+		else if (pDir == 'r')
+		{
+			if (bombTime[r][c + 1] == 0 && grid[r][c + 1] == ' ')
+			{
+				bombTime[r][c + 1] = bombTime[r][c];
+				grid[r][c + 1] = 'B';
+				bombTime[r][c] = 0;
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+			}
+		}
+		else if (pDir == 'l')
+		{
+			if (bombTime[r][c - 1] == 0 && grid[r][c - 1] == ' ')
+			{
+				bombTime[r][c - 1] = bombTime[r][c];
+				grid[r][c - 1] = 'B';
+				bombTime[r][c] = 0;
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+			}
+		}
+	}
+	else if (playerBombType == 2)
+	{
+		if (pDir == 'u')
+		{
+			if ((bombTime[r - 1][c] == 0 && bombTime[r - 2][c] == 0) && (grid[r - 1][c] == 'O' && grid[r - 2][c] == ' '))
+			{
+				bombTime[r - 2][c] = bombTime[r][c];
+				grid[r - 2][c] = 'B';
+				bombTime[r][c] = 0;
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+			}
+		}
+		else if (pDir == 'd')
+		{
+			if ((bombTime[r + 1][c] == 0 && bombTime[r + 2][c] == 0) && (grid[r + 1][c] == 'O' && grid[r + 2][c] == ' '))
+			{
+				bombTime[r + 2][c] = bombTime[r][c];
+				grid[r + 2][c] = 'B';
+				bombTime[r][c] = 0;
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+			}
+		}
+		else if (pDir == 'r')
+		{
+			if ((bombTime[r][c + 1] == 0 && bombTime[r][c + 2] == 0) && (grid[r][c + 1] == 'O' && grid[r][c + 2] == ' '))
+			{
+				bombTime[r][c + 2] = bombTime[r][c];
+				grid[r][c + 2] = 'B';
+				bombTime[r][c] = 0;
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+			}
+		}
+		else if (pDir == 'l')
+		{
+			if ((bombTime[r][c - 1] == 0 && bombTime[r][c - 2] == 0) && (grid[r][c - 1] == 'O' && grid[r][c - 2] == ' '))
+			{
+				bombTime[r][c - 2] = bombTime[r][c];
+				grid[r][c - 2] = 'B';
+				bombTime[r][c] = 0;
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+			}
+		}
+	}
+	else if (playerBombType == 3)
+	{
+		int bombR = r, bombC = c;
+		if (pDir == 'u')
+		{
+			if (bombTime[r - 1][c] == 0 && grid[r - 1][c] == ' ')
+			{
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+				while (bombTime[bombR - 1][bombC] == 0 && grid[bombR - 1][bombC] == ' ')
+					bombR--;
+				bombTime[bombR][bombC] = bombTime[r][c];
+				grid[bombR][bombC] = 'B';
+				bombTime[r][c] = 0;
+			}
+		}
+		else if (pDir == 'd')
+		{
+			if (bombTime[r + 1][c] == 0 && grid[r + 1][c] == ' ')
+			{
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+				while (bombTime[bombR + 1][bombC] == 0 && grid[bombR + 1][bombC] == ' ')
+					bombR++;
+				bombTime[bombR][bombC] = bombTime[r][c];
+				grid[bombR][bombC] = 'B';
+				bombTime[r][c] = 0;
+			}
+		}
+		else if (pDir == 'r')
+		{
+			if (bombTime[r][c + 1] == 0 && grid[r][c + 1] == ' ')
+			{
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+				while (bombTime[bombR][bombC + 1] == 0 && grid[bombR][bombC + 1] == ' ')
+					bombC++;
+				bombTime[bombR][bombC] = bombTime[r][c];
+				grid[bombR][bombC] = 'B';
+				bombTime[r][c] = 0;
+			}
+		}
+		else if (pDir == 'l')
+		{
+			if (bombTime[r][c - 1] == 0 && grid[r][c - 1] == ' ')
+			{
+				grid[r][c] = 'P';
+				playerRow = r;
+				playerCol = c;
+				while (bombTime[bombR][bombC - 1] == 0 && grid[bombR][bombC - 1] == ' ')
+					bombC--;
+				bombTime[bombR][bombC] = bombTime[r][c];
+				grid[bombR][bombC] = 'B';
+				bombTime[r][c] = 0;
+			}
+		}
+	}
 }
 
 void Input()
@@ -706,7 +768,6 @@ void Draw()
 	SetCursorPosition(0, 0);
 	SetConsoleColor(5);
 	
-	cout << "DEBUG: " << "Player Kills: " << playerKills << endl;
 	cout << "Score: " << playerScore << "\tLives: " << playerLives << endl << endl;
 
 	for (int i = 0; i <= ROWS-1; i++)
