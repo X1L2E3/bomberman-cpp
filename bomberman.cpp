@@ -107,7 +107,7 @@ void ShowConsoleCursor(bool visible)
 
 void StageAbility()
 {
-	cout << "Choose powerup: \n(1) Mobile bomb\n(2) Jumping bomb\n(3) Controlled bomb";
+	cout << "Choose powerup: \n(1) Mobile bomb\n(2) Jumping bomb\n(3) Slippery bomb";
 	switch(_getch())
 	{
 		case 1:
@@ -748,6 +748,12 @@ void Input()
 				playerBombsPlaced++;
 				grid[playerRow][playerCol] = 'B';
 			}
+			break;
+		case 'p':
+			cout << "Game paused. Press any key to resume...";
+			while (true) 
+			{_getch(); break;} 
+			system("cls");
 			break;
 		case 27:
 		case 8:
