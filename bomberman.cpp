@@ -110,13 +110,13 @@ void StageAbility()
 	cout << "Choose powerup: \n(1) Mobile bomb\n(2) Jumping bomb\n(3) Slippery bomb";
 	switch(_getch())
 	{
-		case 1:
+		case '1':
 		playerBombType = 1;
 		break;
-		case 2:
+		case '2':
 		playerBombType = 2;
 		break;
-		case 3:
+		case '3':
 		playerBombType = 3;
 		break;
 	}
